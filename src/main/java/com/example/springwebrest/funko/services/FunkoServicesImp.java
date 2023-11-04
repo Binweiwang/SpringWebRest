@@ -70,7 +70,7 @@ public class FunkoServicesImp implements FunkoServices {
     public void deleteAll() {
         funkoRepository.deleteAll();
     }
-    private Categoria checkCategoria(String nombreCategoria) {
+    protected Categoria checkCategoria(String nombreCategoria) {
         var categoria = categoriaRepository.findByTipoEqualsIgnoreCase(nombreCategoria);
         // Buscamos la categoría por su nombre, debe existir y no estar borrada
         if (categoria.isEmpty() || categoria.get().isActive()) {

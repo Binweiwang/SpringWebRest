@@ -1,5 +1,6 @@
-package com.example.springwebrest.controller;
+package com.example.springwebrest.funko.controller;
 
+import com.example.springwebrest.categoria.models.Categoria;
 import com.example.springwebrest.funko.dto.FunkoCreateRequest;
 import com.example.springwebrest.funko.dto.FunkoResponseDto;
 import com.example.springwebrest.funko.exceptions.FunkoNotFound;
@@ -25,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -48,7 +50,7 @@ class FunkoControllerTest {
             .price(100.0)
             .quantity(10)
             .image("image")
-            .category("category")
+            .categoria(new Categoria(UUID.fromString("b3d4931d-c1c0-468b-a4b6-9814017a7339"), "TEST", LocalDateTime.now(), LocalDateTime.now(), false))
             .build();
     private final FunkoCreateRequest funkoRequestDto = FunkoCreateRequest.builder()
             .id(2L)
@@ -56,7 +58,7 @@ class FunkoControllerTest {
             .price(200.0)
             .quantity(20)
             .image("image2")
-            .category("category2")
+            .categoria("DISNEY")
             .build();
     @Autowired
     MockMvc mockMvc;
@@ -66,7 +68,7 @@ class FunkoControllerTest {
             .price(100.0)
             .quantity(10)
             .image("image")
-            .category("category")
+            .categoria(new Categoria(UUID.fromString("b3d4931d-c1c0-468b-a4b6-9814017a7338"), "DISNEY", LocalDateTime.now(), LocalDateTime.now(), false))
             .updatedAt(LocalDateTime.now())
             .createdAt(LocalDateTime.now())
             .build();
@@ -76,7 +78,7 @@ class FunkoControllerTest {
             .price(200.0)
             .quantity(20)
             .image("image2")
-            .category("category2")
+            .categoria(new Categoria(UUID.fromString("b3d4931d-c1c0-468b-a4b6-9814017a7339"), "TEST", LocalDateTime.now(), LocalDateTime.now(), false))
             .updatedAt(LocalDateTime.now())
             .createdAt(LocalDateTime.now())
             .build();
@@ -120,7 +122,7 @@ class FunkoControllerTest {
     @Test
     void getFunko() throws Exception {
         when(funkoService.findById(1L))
-                .thenReturn(funko1);
+                .thenReturn(funkoResponseDto);
 
         when(funkoMapper.toFunko(funko1))
                 .thenReturn(funkoResponseDto);
@@ -155,12 +157,7 @@ class FunkoControllerTest {
 
     @Test
     void postFunko() throws Exception {
-        when(funkoMapper.toFunko(funkoRequestDto))
-                .thenReturn(funko1);
-        when(funkoService.save(funko1))
-                .thenReturn(funko1);
-        when(funkoMapper.toFunko(funko1))
-                .thenReturn(funkoResponseDto);
+        when(funkoService.save(funkoRequestDto)).thenReturn(funkoResponseDto);
 
         MockHttpServletResponse response = mockMvc.perform(
                         post(myEndpoint)
@@ -180,10 +177,6 @@ class FunkoControllerTest {
 
     @Test
     void putFunko() throws Exception {
-        when(funkoMapper.toFunko(funkoRequestDto))
-                .thenReturn(funko1);
-        when(funkoService.save(any()))
-                .thenReturn(funko1);
         when(funkoMapper.toFunko(funko1))
                 .thenReturn(funkoResponseDto);
 
@@ -205,10 +198,6 @@ class FunkoControllerTest {
 
     @Test
     void patchFunko() throws Exception {
-        when(funkoMapper.toFunko(funkoRequestDto))
-                .thenReturn(funko1);
-        when(funkoService.update(any()))
-                .thenReturn(funko1);
         when(funkoMapper.toFunko(funko1))
                 .thenReturn(funkoResponseDto);
 
@@ -230,9 +219,7 @@ class FunkoControllerTest {
     @Test
     void deleteFunko() throws Exception {
         when(funkoService.findById(1L))
-                .thenReturn(funko1);
-        when(funkoService.deleteById(1L))
-                .thenReturn(funko1);
+                .thenReturn(funkoResponseDto);
 
         MockHttpServletResponse response = mockMvc.perform(
                         delete(myEndpoint + "/1")
@@ -254,12 +241,10 @@ class FunkoControllerTest {
                 .price(-100.0)
                 .quantity(-10)
                 .image("image")
-                .category("category")
+                .categoria(new Categoria(UUID.fromString("b3d4931d-c1c0-468b-a4b6-9814017a7339"), "TEST", LocalDateTime.now(), LocalDateTime.now(), false))
                 .build();
         when(funkoMapper.toFunko(any()))
-                .thenReturn(funko1);
-        when(funkoService.save(funko1))
-                .thenReturn(funko1);
+                .thenReturn(funkoDto);
         when(funkoMapper.toFunko(funko1))
                 .thenReturn(funkoDto);
         // Consulto el endpoint
