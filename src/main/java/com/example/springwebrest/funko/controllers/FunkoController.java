@@ -5,8 +5,6 @@ import com.example.springwebrest.funko.dto.FunkoResponseDto;
 import com.example.springwebrest.funko.dto.FunkoUpdateRequest;
 import com.example.springwebrest.funko.mapper.FunkoMapper;
 import com.example.springwebrest.funko.services.FunkoServices;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -55,10 +53,6 @@ public class FunkoController {
     public ResponseEntity<FunkoResponseDto> patchFunko(@PathVariable Long id, @Valid @RequestBody FunkoUpdateRequest funko) {
         return ResponseEntity.ok(funkoServices.update(id, funko));
     }
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Producto borrado"),
-            @ApiResponse(responseCode = "404", description = "Producto no encontrado"),
-    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFunko(@PathVariable Long id) {
         funkoServices.deleteById(id);

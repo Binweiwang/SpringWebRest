@@ -47,6 +47,8 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     // https://mvnrepository.com/artifact/io.swagger.core.v3/swagger-annotations
     implementation("io.swagger.core.v3:swagger-annotations:2.2.18")
+    //
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
 
 }

@@ -9,16 +9,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Builder
+@NoArgsConstructor
 @Data
 @AllArgsConstructor
 public class FunkoResponseDto {
-    private final Long id;
-    private final String name;
+    private Long id;
+    private String name;
     @Min(value = 0, message = "Precio no puede ser menor a 0")
-    private final Double price;
+    private Double price;
     @Min(value = 0, message = "Cantidad no puede ser menor a 0")
-    private final Integer quantity;
-    private final String image;
+    private Integer quantity;
+    private String image;
     @NotEmpty(message = "Categoria no puede estar vacio")
-    private final Categoria categoria;
+    private Categoria categoria;
 }

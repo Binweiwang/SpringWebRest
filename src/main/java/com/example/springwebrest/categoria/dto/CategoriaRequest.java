@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class CategoriaRequest {
     @NotEmpty(message = "El nombre no puede estar vacio")
     @Pattern(regexp= "SERIES|DISNEY|SUPERHEROES|PELICULA|OTROS", message = "El tipo de categoria no es valido")

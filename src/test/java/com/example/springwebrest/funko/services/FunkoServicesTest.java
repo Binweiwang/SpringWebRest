@@ -6,13 +6,13 @@ import com.example.springwebrest.categoria.repository.CategoriaRepository;
 import com.example.springwebrest.funko.dto.FunkoCreateRequest;
 import com.example.springwebrest.funko.dto.FunkoResponseDto;
 import com.example.springwebrest.funko.dto.FunkoUpdateRequest;
+import com.example.springwebrest.funko.exceptions.FunkoBadRequest;
 import com.example.springwebrest.funko.exceptions.FunkoNotFound;
 import com.example.springwebrest.funko.mapper.FunkoMapper;
 import com.example.springwebrest.funko.models.Funko;
 import com.example.springwebrest.funko.repository.FunkoRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.DoNotMock;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -49,13 +49,21 @@ public class FunkoServicesTest {
             .image("https://images-na.ssl-images-amazon.com/images/I/61%2B%2Bq%2B0%2B%2BZL._AC_SL1500_.jpg")
             .categoria("DISNEY")
             .build();
+
+    private final FunkoUpdateRequest funkoUpdateRequestCategoriaNull = FunkoUpdateRequest.builder()
+            .name("Funko 1")
+            .price(100.0)
+            .quantity(10)
+            .image("https://images-na.ssl-images-amazon.com/images/I/61%2B%2Bq%2B0%2B%2BZL._AC_SL1500_.jpg")
+            .categoria(null)
+            .build();
     private final FunkoResponseDto funkoResponseDto = FunkoResponseDto.builder()
             .id(1L)
             .name("Funko 1")
             .price(100.0)
             .quantity(10)
             .image("https://images-na.ssl-images-amazon.com/images/I/61%2B%2Bq%2B0%2B%2BZL._AC_SL1500_.jpg")
-            .categoria(new Categoria())
+            .categoria(categoria)
             .build();
     private final FunkoCreateRequest funkoCreateRequest = FunkoCreateRequest.builder()
             .name("Funko 1")
@@ -92,21 +100,26 @@ public class FunkoServicesTest {
     @Test
     void findById() {
         var funko = new Funko(1L, "Funko 1", 100.0, 10, "https://images-na.ssl-images-amazon.com/images/I/61%2B%2Bq%2B0%2B%2BZL._AC_SL1500_.jpg", new Categoria(), LocalDateTime.now(), LocalDateTime.now());
-        var funkoId = 99L;
 
         when(repository.findById(1L)).thenReturn(Optional.of(funko));
         when(funkoMapper.toFunko(funko)).thenReturn(funkoResponseDto);
-        when(repository.findById(funkoId)).thenThrow(FunkoNotFound.class);
+        when(repository.findById(99L)).thenThrow(FunkoNotFound.class);
 
         FunkoResponseDto funkoFindById = funkoService.findById(1L);
 
         assertAll("Obtener funko por id",
                 () -> assertEquals("Funko 1", funkoFindById.getName()),
                 () -> assertEquals(100.0, funkoFindById.getPrice()),
-                () -> assertThrows(FunkoNotFound.class, () -> funkoService.findById(funkoId))
+                () -> assertThrows(FunkoNotFound.class, () -> funkoService.findById(99L))
         );
     }
 
+    @Test
+    void findByIdNoExiste() {
+        when(repository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(FunkoNotFound.class, () -> funkoService.findById(1L));
+    }
     @Test
     void save() {
         when(categoriaRepository.findByTipoEqualsIgnoreCase("DISNEY")).thenReturn(Optional.of(categoria));
@@ -118,21 +131,50 @@ public class FunkoServicesTest {
         FunkoResponseDto result = funkoService.save(funkoCreateRequest);
 
         // Assert
-        assertEquals(funkoResponseDto, result );
+        assertEquals(funkoResponseDto, result);
     }
 
     @Test
     void update() {
-        when(categoriaRepository.findByTipoEqualsIgnoreCase("DISNEY")).thenReturn(Optional.of(categoria));
-        when(funkoMapper.toFunko(funkoCreateRequest, categoria)).thenReturn(funko);
+        when(repository.findById(anyLong())).thenReturn(Optional.of(funko));
+        when(categoriaRepository.findByTipoEqualsIgnoreCase(anyString())).thenReturn(Optional.of(categoria));
+        when(funkoMapper.toFunko(funkoUpdateRequest, funko, categoria)).thenReturn(funko);
         when(repository.save(any(Funko.class))).thenReturn(funko);
         when(funkoMapper.toFunko(any(Funko.class))).thenReturn(funkoResponseDto);
 
-        // Act
-        FunkoResponseDto result = funkoService.save(funkoCreateRequest);
 
-        // Assert
-        assertEquals(funkoResponseDto, result );
+        FunkoResponseDto funkoUpdated = funkoService.update(1L, funkoUpdateRequest);
+
+        assertAll("Comprobar funko actualizado",
+                () -> assertEquals("Funko 1", funkoUpdated.getName()),
+                () -> assertEquals(100.0, funkoUpdated.getPrice()),
+                () -> assertEquals(10, funkoUpdated.getQuantity()),
+                () -> assertEquals("https://images-na.ssl-images-amazon.com/images/I/61%2B%2Bq%2B0%2B%2BZL._AC_SL1500_.jpg", funkoUpdated.getImage())
+                );
+
+    }
+    @Test
+    void updateNoExiste(){
+        when(repository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(FunkoNotFound.class, () -> funkoService.update(1L, funkoUpdateRequest));
+    }
+    @Test
+    void updateFunkoNull() {
+        when(repository.findById(anyLong())).thenReturn(Optional.of(funko));
+        when(repository.save(any(Funko.class))).thenReturn(funko);
+        when(funkoMapper.toFunko(any(FunkoUpdateRequest.class),any(Funko.class),any(Categoria.class))).thenReturn(funko);
+        when(funkoMapper.toFunko(any(Funko.class))).thenReturn(funkoResponseDto);
+
+        FunkoResponseDto funkoUpdated = funkoService.update(1L, funkoUpdateRequestCategoriaNull);
+
+        assertAll("Comprobar funko actualizado",
+                () -> assertEquals("Funko 1", funkoUpdated.getName()),
+                () -> assertEquals(100.0, funkoUpdated.getPrice()),
+                () -> assertEquals(10, funkoUpdated.getQuantity()),
+                () -> assertEquals("https://images-na.ssl-images-amazon.com/images/I/61%2B%2Bq%2B0%2B%2BZL._AC_SL1500_.jpg", funkoUpdated.getImage()),
+                () -> assertEquals("DISNEY", funkoUpdated.getCategoria().getTipo())
+        );
 
     }
     @Test
@@ -143,7 +185,13 @@ public class FunkoServicesTest {
         funkoService.deleteById(1L);
 
         verify(repository, times(1)).deleteById(1L);
+    }
 
+    @Test
+    void deleteByIdNoExiste() {
+        when(repository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(FunkoNotFound.class, () -> funkoService.deleteById(1L));
     }
 
     @Test
@@ -151,4 +199,31 @@ public class FunkoServicesTest {
         funkoService.deleteAll();
         verify(repository, times(1)).deleteAll();
     }
+
+    @Test
+    void checkCategoria() {
+        when(categoriaRepository.findByTipoEqualsIgnoreCase(anyString())).thenReturn(Optional.of(categoria));
+
+        Categoria categoriaChecked = funkoService.checkCategoria("DISNEY");
+
+        assertAll("Comprobar categoría",
+                () -> assertEquals("DISNEY", categoriaChecked.getTipo()),
+                () -> assertFalse(categoriaChecked.isActive()));
+    }
+
+    @Test
+    void categoriaNoExiste() {
+        when(categoriaRepository.findByTipoEqualsIgnoreCase("INEXISTENTE")).thenReturn(Optional.empty());
+
+        assertThrows(FunkoBadRequest.class, () -> funkoService.checkCategoria("INEXISTENTE"));
+    }
+
+    @Test
+    void categoriaBorrada() {
+        categoria.setActive(true);
+
+        when(categoriaRepository.findByTipoEqualsIgnoreCase("BORRADA")).thenReturn(Optional.of(categoria));
+        assertThrows(FunkoBadRequest.class, () -> funkoService.checkCategoria("BORRADA"));
+    }
+
 }

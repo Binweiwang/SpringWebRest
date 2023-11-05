@@ -3,12 +3,13 @@ package com.example.springwebrest.funko.controller;
 import com.example.springwebrest.categoria.models.Categoria;
 import com.example.springwebrest.funko.dto.FunkoCreateRequest;
 import com.example.springwebrest.funko.dto.FunkoResponseDto;
+import com.example.springwebrest.funko.dto.FunkoUpdateRequest;
 import com.example.springwebrest.funko.exceptions.FunkoNotFound;
 import com.example.springwebrest.funko.mapper.FunkoMapper;
 import com.example.springwebrest.funko.models.Funko;
 import com.example.springwebrest.funko.services.FunkoServices;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -23,13 +24,11 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
@@ -45,20 +44,29 @@ class FunkoControllerTest {
     private final FunkoMapper funkoMapper;
     private final String myEndpoint = "/funkos";
     private final FunkoResponseDto funkoResponseDto = FunkoResponseDto.builder()
-            .id(1L)
+            .id(2L)
             .name("Funko")
             .price(100.0)
             .quantity(10)
             .image("image")
             .categoria(new Categoria(UUID.fromString("b3d4931d-c1c0-468b-a4b6-9814017a7339"), "TEST", LocalDateTime.now(), LocalDateTime.now(), false))
             .build();
-    private final FunkoCreateRequest funkoRequestDto = FunkoCreateRequest.builder()
-            .id(2L)
+    private final FunkoCreateRequest funkoCreateRequest = FunkoCreateRequest.builder()
+            .id(1L)
             .name("Funko2")
             .price(200.0)
             .quantity(20)
             .image("image2")
             .categoria("DISNEY")
+            .build();
+
+
+    private final FunkoResponseDto funkoResponseDtoError = FunkoResponseDto.builder()
+            .name("Funko")
+            .price(-100.0)
+            .quantity(10)
+            .image("image")
+            .categoria(new Categoria(UUID.fromString("b3d4931d-c1c0-468b-a4b6-9814017a7339"), "TEST", LocalDateTime.now(), LocalDateTime.now(), false))
             .build();
     @Autowired
     MockMvc mockMvc;
@@ -81,6 +89,20 @@ class FunkoControllerTest {
             .categoria(new Categoria(UUID.fromString("b3d4931d-c1c0-468b-a4b6-9814017a7339"), "TEST", LocalDateTime.now(), LocalDateTime.now(), false))
             .updatedAt(LocalDateTime.now())
             .createdAt(LocalDateTime.now())
+            .build();
+    private final FunkoUpdateRequest funkoUpdateRequest = FunkoUpdateRequest.builder()
+            .name("Funko")
+            .price(100.0)
+            .quantity(10)
+            .image("image")
+            .categoria("DISNEY")
+            .build();
+    private final FunkoUpdateRequest funkoUpdateRequestError = FunkoUpdateRequest.builder()
+            .name("Funko")
+            .price(-100.0)
+            .quantity(10)
+            .image("image")
+            .categoria("DISNEY")
             .build();
     @Autowired
     private JacksonTester<FunkoCreateRequest> jacksonRequestDto;
@@ -107,15 +129,13 @@ class FunkoControllerTest {
                                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse();
 
-
-        List<FunkoResponseDto> res = mapper.readValue(response.getContentAsString(),
-                mapper.getTypeFactory().constructCollectionType(List.class, FunkoResponseDto.class));
+        List<FunkoResponseDto> res = mapper.readValue(response.getContentAsString(), mapper.registerModule(new JavaTimeModule()).getTypeFactory().constructCollectionType(List.class, FunkoResponseDto.class));
 
         assertAll("Obtener todos los funkos",
                 () -> assertEquals(response.getStatus(), HttpStatus.OK.value()),
-                () -> assertTrue(response.getContentAsString().contains("\"id\":" + funko1.getId())),
+                () -> assertTrue(response.getContentAsString().contains("\"id\":" + funkoResponseDto.getId())),
                 () -> assertTrue(res.size() > 0),
-                () -> assertTrue(res.stream().anyMatch(r -> r.getId().equals(funko1.getId())))
+                () -> assertTrue(res.stream().anyMatch(r -> r.getId().equals(funkoResponseDto.getId())))
         );
     }
 
@@ -131,24 +151,25 @@ class FunkoControllerTest {
                                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse();
 
-        FunkoResponseDto res = mapper.readValue(response.getContentAsString(),
-                mapper.getTypeFactory().constructType(FunkoResponseDto.class));
+        FunkoResponseDto res = mapper.readValue(response.getContentAsString(), mapper.registerModule(new JavaTimeModule())
+                .getTypeFactory().constructType(FunkoResponseDto.class));
         assertAll("Obtener funko por id",
                 () -> assertEquals(response.getStatus(), HttpStatus.OK.value()),
-                () -> assertTrue(response.getContentAsString().contains("\"id\":" + funko1.getId())),
-                () -> assertEquals(res.getId(), funko1.getId())
+                () -> assertTrue(response.getContentAsString().contains("\"id\":" + funkoResponseDto.getId())),
+                () -> assertEquals(res.getId(), funkoResponseDto.getId())
         );
     }
 
     @Test
     void getFunkoNotFound() throws Exception {
-        when(funkoService.findById(1L))
-                .thenThrow(new FunkoNotFound("No se encontró funko con id: " + 1L + " en la base de datos"));
+        when(funkoService.findById(999L))
+                .thenThrow(new FunkoNotFound("El funko con id 999 no existe"));
 
         MockHttpServletResponse response = mockMvc.perform(
-                        get(myEndpoint + "/1")
+                        get(myEndpoint + "/999")
                                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse();
+
 
         assertAll("Obtener funko por id",
                 () -> assertEquals(response.getStatus(), HttpStatus.NOT_FOUND.value())
@@ -157,63 +178,64 @@ class FunkoControllerTest {
 
     @Test
     void postFunko() throws Exception {
-        when(funkoService.save(funkoRequestDto)).thenReturn(funkoResponseDto);
+        when(funkoService.save(funkoCreateRequest)).thenReturn(funkoResponseDto);
 
         MockHttpServletResponse response = mockMvc.perform(
                         post(myEndpoint)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(jacksonRequestDto.write(funkoRequestDto).getJson()))
+                                .content(jacksonRequestDto.write(funkoCreateRequest).getJson()))
                 .andReturn().getResponse();
         FunkoResponseDto res = mapper.readValue(response.getContentAsString(),
-                mapper.getTypeFactory().constructType(FunkoResponseDto.class));
+                mapper.registerModule(new JavaTimeModule()).getTypeFactory().constructType(FunkoResponseDto.class));
 
         assertAll("Guardar un funko",
                 () -> assertEquals(response.getStatus(), HttpStatus.CREATED.value()),
-                () -> assertTrue(response.getContentAsString().contains("\"id\":" + funko1.getId())),
-                () -> assertEquals(res.getId(), funko1.getId()),
-                () -> assertEquals(res.getName(), funko1.getName())
+                () -> assertTrue(response.getContentAsString().contains("\"id\":" + funkoResponseDto.getId())),
+                () -> assertEquals(res.getId(), funkoResponseDto.getId()),
+                () -> assertEquals(res.getName(), funkoResponseDto.getName())
         );
     }
 
     @Test
     void putFunko() throws Exception {
-        when(funkoMapper.toFunko(funko1))
+        when(funkoService.update(1L, funkoUpdateRequest))
                 .thenReturn(funkoResponseDto);
+
 
         MockHttpServletResponse response = mockMvc.perform(
                         put(myEndpoint + "/1")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(funkoResponseDto)))
+                                .content(mapper.writeValueAsString(funkoUpdateRequest)))
                 .andReturn().getResponse();
         FunkoResponseDto res = mapper.readValue(response.getContentAsString(),
-                mapper.getTypeFactory().constructType(FunkoResponseDto.class));
+                mapper.registerModule(new JavaTimeModule()).getTypeFactory().constructType(FunkoResponseDto.class));
 
         assertAll("Actualizar un funko",
                 () -> assertEquals(response.getStatus(), HttpStatus.OK.value()),
-                () -> assertTrue(response.getContentAsString().contains("\"id\":" + funko1.getId())),
-                () -> assertEquals(res.getId(), funko1.getId()),
-                () -> assertEquals(res.getName(), funko1.getName()));
+                () -> assertTrue(response.getContentAsString().contains("\"id\":" + funkoResponseDto.getId())),
+                () -> assertEquals(res.getId(), funkoResponseDto.getId()),
+                () -> assertEquals(res.getName(), funkoResponseDto.getName()));
 
     }
 
     @Test
     void patchFunko() throws Exception {
-        when(funkoMapper.toFunko(funko1))
+        when(funkoService.update(1L, funkoUpdateRequest))
                 .thenReturn(funkoResponseDto);
 
         MockHttpServletResponse response = mockMvc.perform(
-                        patch(myEndpoint + "/2")
+                        patch(myEndpoint + "/1")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(funkoResponseDto)))
+                                .content(mapper.registerModule(new JavaTimeModule()).writeValueAsString(funkoUpdateRequest)))
                 .andReturn().getResponse();
         FunkoResponseDto res = mapper.readValue(response.getContentAsString(),
-                mapper.getTypeFactory().constructType(FunkoResponseDto.class));
+                mapper.registerModule(new JavaTimeModule()).getTypeFactory().constructType(FunkoResponseDto.class));
 
         assertAll("Actualizar un funko",
                 () -> assertEquals(response.getStatus(), HttpStatus.OK.value()),
-                () -> assertTrue(response.getContentAsString().contains("\"id\":" + funko1.getId())),
-                () -> assertEquals(res.getId(), funko1.getId()),
-                () -> assertEquals(res.getName(), funko1.getName()));
+                () -> assertTrue(response.getContentAsString().contains("\"id\":" + funkoResponseDto.getId())),
+                () -> assertEquals(res.getId(), funkoResponseDto.getId()),
+                () -> assertEquals(res.getName(), funkoResponseDto.getName()));
     }
 
     @Test
@@ -228,41 +250,26 @@ class FunkoControllerTest {
 
         var id = funko1.getId();
         assertAll("Eliminar un funko",
-                () -> assertEquals(response.getStatus(), HttpStatus.OK.value()),
-                () -> assertTrue(response.getContentAsString().contains("Funko con id: " + id + " eliminado correctamente"))
+                () -> assertEquals(response.getStatus(), HttpStatus.NO_CONTENT.value())
         );
     }
 
     @Test
     void updateProductWithBadRequest() throws Exception {
-        var funkoDto = FunkoResponseDto.builder()
-                .id(1L)
-                .name("Funko")
-                .price(-100.0)
-                .quantity(-10)
-                .image("image")
-                .categoria(new Categoria(UUID.fromString("b3d4931d-c1c0-468b-a4b6-9814017a7339"), "TEST", LocalDateTime.now(), LocalDateTime.now(), false))
-                .build();
-        when(funkoMapper.toFunko(any()))
-                .thenReturn(funkoDto);
-        when(funkoMapper.toFunko(funko1))
-                .thenReturn(funkoDto);
-        // Consulto el endpoint
         MockHttpServletResponse response = mockMvc.perform(
                         put(myEndpoint + "/1")
+                                .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(jacksonResponseDto.write(funkoDto).getJson())
-                                .accept(MediaType.APPLICATION_JSON))
+                                .content(mapper.registerModule(new JavaTimeModule()).writeValueAsString(funkoUpdateRequestError)))
                 .andReturn().getResponse();
-
-        System.out.println(response.getContentAsString());
 
         assertAll(
                 () -> assertEquals(400, response.getStatus()),
                 () -> assertTrue(response.getContentAsString().contains("Precio no puede ser menor a 0"))
         );
     }
-    }
+
+}
 
 
 

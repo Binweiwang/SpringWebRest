@@ -4,18 +4,22 @@ import com.example.springwebrest.categoria.models.Categoria;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class FunkoUpdateRequest {
-    private final String name;
+    private  String name;
     @Min(value = 0, message = "Precio no puede ser menor a 0")
-    private final Double price;
+    private  Double price;
     @Min(value = 0, message = "Cantidad no puede ser menor a 0")
-    private final Integer quantity;
-    private final String image;
+    private  Integer quantity;
+    private  String image;
     @NotBlank(message = "Categoria no puede estar vacio")
-    private final String categoria;
+    private  String categoria;
 }

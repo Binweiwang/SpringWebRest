@@ -3,6 +3,7 @@ package com.example.springwebrest.funko.mapper;
 import com.example.springwebrest.categoria.models.Categoria;
 import com.example.springwebrest.funko.dto.FunkoCreateRequest;
 import com.example.springwebrest.funko.dto.FunkoResponseDto;
+import com.example.springwebrest.funko.dto.FunkoUpdateRequest;
 import com.example.springwebrest.funko.mapper.FunkoMapper;
 import com.example.springwebrest.funko.models.Funko;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +19,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class MapperTest {
 
     private FunkoMapper funkoMapper;
+    private FunkoUpdateRequest funkoUpdateRequest = FunkoUpdateRequest.builder()
+            .name("Test Funko")
+            .price(10.0)
+            .quantity(5)
+            .image("test-image.jpg")
+            .build();
+    private FunkoUpdateRequest funkoUpdateRequestNull = FunkoUpdateRequest.builder()
+            .build();
     private Funko funko = Funko.builder()
             .id(1L)
             .name("Test Funko")
@@ -26,63 +35,66 @@ class MapperTest {
             .image("test-image.jpg")
             .categoria(new Categoria())
             .build();
+    private Categoria categoria = new Categoria(UUID.fromString("018b9c89-9096-7c96-9450-8cbbaa6fc8d9"), "DISNEY", LocalDateTime.now(), LocalDateTime.now(), false);
     @BeforeEach
     public void setup() {
         funkoMapper = new FunkoMapper();
     }
 
     @Test
-     void GetFunko() {
-
+    void toFunko(){
         FunkoResponseDto funkoResponseDto = funkoMapper.toFunko(funko);
-
-        assertEquals(funko.getId(), funkoResponseDto.getId());
-        assertEquals(funko.getName(), funkoResponseDto.getName());
-        assertEquals(funko.getPrice(), funkoResponseDto.getPrice());
-        assertEquals(funko.getQuantity(), funkoResponseDto.getQuantity());
-        assertEquals(funko.getImage(), funkoResponseDto.getImage());
-        assertEquals(funko.getCategoria(), funkoResponseDto.getCategoria());
+        assertEquals(funkoResponseDto.getId(), funko.getId());
+        assertEquals(funkoResponseDto.getName(), funko.getName());
+        assertEquals(funkoResponseDto.getPrice(), funko.getPrice());
+        assertEquals(funkoResponseDto.getQuantity(), funko.getQuantity());
+        assertEquals(funkoResponseDto.getImage(), funko.getImage());
+        assertEquals(funkoResponseDto.getCategoria(), funko.getCategoria());
     }
 
     @Test
-     void GetFunkos() {
-        var funko1 = Funko.builder()
-                .id(1L)
-                .name("Funko 1")
-                .build();
-
-        var funko2 = Funko.builder()
-                .id(2L)
-                .name("Funko 2")
-                .build();
-
-        List<Funko> funkos = Arrays.asList(funko1, funko2);
-
-        List<FunkoResponseDto> responseDtos = funkoMapper.toResponses(funkos);
-
-        assertEquals(funkos.size(), responseDtos.size());
-        assertEquals(funkos.get(0).getId(), responseDtos.get(0).getId());
-        assertEquals(funkos.get(1).getName(), responseDtos.get(1).getName());
-
-    }
-    @Test
-   void modelToFunko(){
-        Funko funko = Funko.builder()
-                .id(1L)
+    void toFunkoCreateRequest(){
+        FunkoCreateRequest funkoCreateRequest = FunkoCreateRequest.builder()
                 .name("Test Funko")
                 .price(10.0)
                 .quantity(5)
                 .image("test-image.jpg")
-                .categoria(new Categoria(UUID.fromString("b3d4931d-c1c0-468b-a4b6-9814017a7339"),"DISNEY", LocalDateTime.now(), LocalDateTime.now(), false))
                 .build();
+        Funko funko = funkoMapper.toFunko(funkoCreateRequest, categoria);
+        assertEquals(funkoCreateRequest.getName(), funko.getName());
+        assertEquals(funkoCreateRequest.getPrice(), funko.getPrice());
+        assertEquals(funkoCreateRequest.getQuantity(), funko.getQuantity());
+        assertEquals(funkoCreateRequest.getImage(), funko.getImage());
+    }
 
-        FunkoResponseDto funkoResponseDto = funkoMapper.toFunko(funko);
+    @Test
+    void toFunkoUpdateRequest(){
+        Funko funkoMapped = funkoMapper.toFunko(funkoUpdateRequest, funko, categoria);
+        assertEquals(funko.getName(), funkoMapped.getName());
+        assertEquals(funko.getPrice(), funkoMapped.getPrice());
+        assertEquals(funko.getQuantity(), funkoMapped.getQuantity());
+        assertEquals(funko.getImage(), funkoMapped.getImage());
+    }
+    @Test
+    void toFunkoUpdateRequestNull(){
+        Funko funkoMapped = funkoMapper.toFunko(funkoUpdateRequestNull, funko, categoria);
 
-        assertEquals(funko.getId(), funkoResponseDto.getId());
-        assertEquals(funko.getName(), funkoResponseDto.getName());
-        assertEquals(funko.getPrice(), funkoResponseDto.getPrice());
-        assertEquals(funko.getQuantity(), funkoResponseDto.getQuantity());
-        assertEquals(funko.getImage(), funkoResponseDto.getImage());
-        assertEquals(funko.getCategoria(), funkoResponseDto.getCategoria());
+        assertEquals(funko.getName(), funkoMapped.getName());
+        assertEquals(funko.getPrice(), funkoMapped.getPrice());
+        assertEquals(funko.getQuantity(), funkoMapped.getQuantity());
+        assertEquals(funko.getImage(), funkoMapped.getImage());
+
+    }
+
+   @Test
+    void toFunkoList(){
+        List<Funko> funkos = Arrays.asList(funko);
+        List<FunkoResponseDto> funkoResponseDtos = funkoMapper.toResponses(funkos);
+        assertEquals(funkoResponseDtos.get(0).getId(), funko.getId());
+        assertEquals(funkoResponseDtos.get(0).getName(), funko.getName());
+        assertEquals(funkoResponseDtos.get(0).getPrice(), funko.getPrice());
+        assertEquals(funkoResponseDtos.get(0).getQuantity(), funko.getQuantity());
+        assertEquals(funkoResponseDtos.get(0).getImage(), funko.getImage());
+        assertEquals(funkoResponseDtos.get(0).getCategoria(), funko.getCategoria());
     }
 }
