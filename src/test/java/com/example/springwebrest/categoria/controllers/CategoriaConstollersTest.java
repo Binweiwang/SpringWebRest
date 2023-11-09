@@ -1,15 +1,14 @@
 package com.example.springwebrest.categoria.controllers;
 
-import com.example.springwebrest.categoria.dto.CategoriaRequest;
-import com.example.springwebrest.categoria.mapper.CategoriasMapper;
-import com.example.springwebrest.categoria.models.Categoria;
-import com.example.springwebrest.categoria.services.CategoriaServices;
+import com.example.springwebrest.rest.categoria.dto.CategoriaRequest;
+import com.example.springwebrest.rest.categoria.mapper.CategoriasMapper;
+import com.example.springwebrest.rest.categoria.models.Categoria;
+import com.example.springwebrest.rest.categoria.services.CategoriaServices;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

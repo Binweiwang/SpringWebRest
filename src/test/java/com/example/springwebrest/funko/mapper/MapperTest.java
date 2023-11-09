@@ -1,11 +1,11 @@
 package com.example.springwebrest.funko.mapper;
 
-import com.example.springwebrest.categoria.models.Categoria;
-import com.example.springwebrest.funko.dto.FunkoCreateRequest;
-import com.example.springwebrest.funko.dto.FunkoResponseDto;
-import com.example.springwebrest.funko.dto.FunkoUpdateRequest;
-import com.example.springwebrest.funko.mapper.FunkoMapper;
-import com.example.springwebrest.funko.models.Funko;
+import com.example.springwebrest.rest.categoria.models.Categoria;
+import com.example.springwebrest.rest.funko.dto.FunkoCreateRequest;
+import com.example.springwebrest.rest.funko.dto.FunkoResponseDto;
+import com.example.springwebrest.rest.funko.dto.FunkoUpdateRequest;
+import com.example.springwebrest.rest.funko.mapper.FunkoMapper;
+import com.example.springwebrest.rest.funko.models.Funko;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -1,11 +1,9 @@
 package com.example.springwebrest.funko.repository;
 
-import com.example.springwebrest.categoria.models.Categoria;
-import com.example.springwebrest.funko.models.Funko;
-import org.junit.jupiter.api.BeforeEach;
+import com.example.springwebrest.rest.categoria.models.Categoria;
+import com.example.springwebrest.rest.funko.models.Funko;
+import com.example.springwebrest.rest.funko.repository.FunkoRepository;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 

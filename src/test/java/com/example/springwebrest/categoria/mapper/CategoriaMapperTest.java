@@ -1,7 +1,8 @@
 package com.example.springwebrest.categoria.mapper;
 
-import com.example.springwebrest.categoria.dto.CategoriaRequest;
-import com.example.springwebrest.categoria.models.Categoria;
+import com.example.springwebrest.rest.categoria.dto.CategoriaRequest;
+import com.example.springwebrest.rest.categoria.mapper.CategoriasMapper;
+import com.example.springwebrest.rest.categoria.models.Categoria;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;

@@ -1,6 +1,7 @@
 package com.example.springwebrest.categoria.repository;
 
-import com.example.springwebrest.categoria.models.Categoria;
+import com.example.springwebrest.rest.categoria.models.Categoria;
+import com.example.springwebrest.rest.categoria.repository.CategoriaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

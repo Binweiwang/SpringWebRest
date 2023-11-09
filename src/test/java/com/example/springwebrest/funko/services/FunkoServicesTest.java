@@ -1,22 +1,31 @@
 package com.example.springwebrest.funko.services;
 
-import com.example.springwebrest.categoria.dto.CategoriaRequest;
-import com.example.springwebrest.categoria.models.Categoria;
-import com.example.springwebrest.categoria.repository.CategoriaRepository;
-import com.example.springwebrest.funko.dto.FunkoCreateRequest;
-import com.example.springwebrest.funko.dto.FunkoResponseDto;
-import com.example.springwebrest.funko.dto.FunkoUpdateRequest;
-import com.example.springwebrest.funko.exceptions.FunkoBadRequest;
-import com.example.springwebrest.funko.exceptions.FunkoNotFound;
-import com.example.springwebrest.funko.mapper.FunkoMapper;
-import com.example.springwebrest.funko.models.Funko;
-import com.example.springwebrest.funko.repository.FunkoRepository;
+import com.example.springwebrest.config.websockets.WebSocketConfig;
+import com.example.springwebrest.config.websockets.WebSocketHandler;
+import com.example.springwebrest.rest.categoria.dto.CategoriaRequest;
+import com.example.springwebrest.rest.categoria.models.Categoria;
+import com.example.springwebrest.rest.categoria.repository.CategoriaRepository;
+import com.example.springwebrest.rest.funko.dto.FunkoCreateRequest;
+import com.example.springwebrest.rest.funko.dto.FunkoResponseDto;
+import com.example.springwebrest.rest.funko.dto.FunkoUpdateRequest;
+import com.example.springwebrest.rest.funko.exceptions.FunkoBadRequest;
+import com.example.springwebrest.rest.funko.exceptions.FunkoNotFound;
+import com.example.springwebrest.rest.funko.mapper.FunkoMapper;
+import com.example.springwebrest.rest.funko.models.Funko;
+import com.example.springwebrest.rest.funko.repository.FunkoRepository;
+import com.example.springwebrest.rest.funko.services.FunkoServicesImp;
+import com.example.springwebrest.rest.storage.services.StorageService;
+import com.example.springwebrest.websockets.notifications.mapper.FunkoNotificationMapper;
+import com.example.springwebrest.websockets.notifications.models.Notificacion;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +43,7 @@ public class FunkoServicesTest {
             .name("Funko 1")
             .price(100.0)
             .quantity(10)
-            .image("https://images-na.ssl-images-amazon.com/images/I/61%2B%2Bq%2B0%2B%2BZL._AC_SL1500_.jpg")
+            .image("https://wallhaven.cc/w/85852j")
             .categoria(categoria)
             .build();
     private final List<Funko> ListaFunkos = List.of(
@@ -62,7 +71,7 @@ public class FunkoServicesTest {
             .name("Funko 1")
             .price(100.0)
             .quantity(10)
-            .image("https://images-na.ssl-images-amazon.com/images/I/61%2B%2Bq%2B0%2B%2BZL._AC_SL1500_.jpg")
+            .image("https://wallhaven.cc/w/85852j")
             .categoria(categoria)
             .build();
     private final FunkoCreateRequest funkoCreateRequest = FunkoCreateRequest.builder()
@@ -72,10 +81,17 @@ public class FunkoServicesTest {
             .image("https://images-na.ssl-images-amazon.com/images/I/61%2B%2Bq%2B0%2B%2BZL._AC_SL1500_.jpg")
             .categoria("DISNEY")
             .build();
+    WebSocketHandler webSocketHandler = mock(WebSocketHandler.class);
     @Mock
     private CategoriaRepository categoriaRepository;
     @Mock
-    private FunkoMapper funkoMapper = new FunkoMapper();
+    private StorageService storageService;
+    @Mock
+    private WebSocketConfig webSocketConfig;
+    @Mock
+    private FunkoNotificationMapper funkoNotificationMapper;
+    @Mock
+    private FunkoMapper funkoMapper;
     @Mock
     private FunkoRepository repository;
 
@@ -95,6 +111,11 @@ public class FunkoServicesTest {
                 () -> assertEquals("Funko 2", funkos.get(1).getName()),
                 () -> assertEquals("Funko 3", funkos.get(2).getName())
         );
+    }
+
+    @BeforeEach
+    void setUp(){
+        funkoService.setWebSocketService(webSocketHandler);
     }
 
     @Test
@@ -148,8 +169,7 @@ public class FunkoServicesTest {
         assertAll("Comprobar funko actualizado",
                 () -> assertEquals("Funko 1", funkoUpdated.getName()),
                 () -> assertEquals(100.0, funkoUpdated.getPrice()),
-                () -> assertEquals(10, funkoUpdated.getQuantity()),
-                () -> assertEquals("https://images-na.ssl-images-amazon.com/images/I/61%2B%2Bq%2B0%2B%2BZL._AC_SL1500_.jpg", funkoUpdated.getImage())
+                () -> assertEquals(10, funkoUpdated.getQuantity())
                 );
 
     }
@@ -172,7 +192,6 @@ public class FunkoServicesTest {
                 () -> assertEquals("Funko 1", funkoUpdated.getName()),
                 () -> assertEquals(100.0, funkoUpdated.getPrice()),
                 () -> assertEquals(10, funkoUpdated.getQuantity()),
-                () -> assertEquals("https://images-na.ssl-images-amazon.com/images/I/61%2B%2Bq%2B0%2B%2BZL._AC_SL1500_.jpg", funkoUpdated.getImage()),
                 () -> assertEquals("DISNEY", funkoUpdated.getCategoria().getTipo())
         );
 
@@ -225,5 +244,33 @@ public class FunkoServicesTest {
         when(categoriaRepository.findByTipoEqualsIgnoreCase("BORRADA")).thenReturn(Optional.of(categoria));
         assertThrows(FunkoBadRequest.class, () -> funkoService.checkCategoria("BORRADA"));
     }
+    @Test
+    void onChange() throws IOException {
+        doNothing().when(webSocketHandler).sendMessage(any(String.class));
+
+        funkoService.onChange(Notificacion.Tipo.CREATE,any(Funko.class));
+    }
+
+    @Test
+    void updateImage() throws IOException {
+        String imageUrl = "https://wallhaven.cc/w/85852j";
+
+        MultipartFile multipartFile = mock(MultipartFile.class);
+
+
+        when(repository.findById(anyLong())).thenReturn(Optional.of(funko));
+        when(storageService.store(multipartFile)).thenReturn(imageUrl);
+        when(repository.save(any(Funko.class))).thenReturn(funko);
+        doNothing().when(webSocketHandler).sendMessage(anyString());
+        when(funkoMapper.toFunko(any(Funko.class))).thenReturn(funkoResponseDto);
+
+        FunkoResponseDto funkoResponseDto1 = funkoService.updateImage(funko.getId(), multipartFile, false);
+
+         assertEquals(funkoResponseDto1.getImage(), imageUrl);
+         verify(repository, times(1)).save(any(Funko.class));
+         verify(storageService,times((1))).delete(anyString());
+         verify(storageService, times(1)).store(any(MultipartFile.class));
+    }
+    
 
 }

@@ -1,12 +1,12 @@
 package com.example.springwebrest.categoria.services;
 
-import com.example.springwebrest.categoria.dto.CategoriaRequest;
-import com.example.springwebrest.categoria.exceptions.CategoriaConflict;
-import com.example.springwebrest.categoria.exceptions.CategoriaNotFound;
-import com.example.springwebrest.categoria.mapper.CategoriasMapper;
-import com.example.springwebrest.categoria.models.Categoria;
-import com.example.springwebrest.categoria.repository.CategoriaRepository;
-import com.example.springwebrest.funko.exceptions.FunkoNotFound;
+import com.example.springwebrest.rest.categoria.dto.CategoriaRequest;
+import com.example.springwebrest.rest.categoria.exceptions.CategoriaConflict;
+import com.example.springwebrest.rest.categoria.exceptions.CategoriaNotFound;
+import com.example.springwebrest.rest.categoria.mapper.CategoriasMapper;
+import com.example.springwebrest.rest.categoria.models.Categoria;
+import com.example.springwebrest.rest.categoria.repository.CategoriaRepository;
+import com.example.springwebrest.rest.categoria.services.CategoriaServicesImp;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
