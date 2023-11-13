@@ -3,14 +3,12 @@ package com.example.springwebrest.rest.funko.dto;
 import com.example.springwebrest.rest.categoria.models.Categoria;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
-@Data
 @AllArgsConstructor
 public class FunkoResponseDto {
     private Long id;

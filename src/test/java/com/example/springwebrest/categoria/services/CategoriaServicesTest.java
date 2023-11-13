@@ -12,6 +12,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,13 +39,19 @@ public class CategoriaServicesTest {
 
     @Test
     void findAll(){
-        when(categoriaRepository.findAll()).thenReturn(List.of(categoria));
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("id").ascending()); // ejemplo de creación de un objeto Pageable
+        Page<Categoria> expectedPage = new PageImpl<>(List.of(categoria)); // ejemplo de creación de un objeto Page
+        // Arrange
+        when(categoriaRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(expectedPage);
 
-        List<Categoria> categorias = categoriaServices.findAll();
 
+        // Act
+        var res = categoriaServices.findAll(Optional.empty(), Optional.empty(), pageable);
+
+        // Assert
         assertAll("findAll",
-                () -> assertNotNull(categorias),
-                () -> assertFalse(categorias.isEmpty())
+                () -> assertNotNull(res),
+                () -> assertFalse(res.isEmpty())
         );
     }
 

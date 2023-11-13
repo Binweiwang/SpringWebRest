@@ -4,18 +4,22 @@ import com.example.springwebrest.rest.categoria.dto.CategoriaRequest;
 import com.example.springwebrest.rest.categoria.mapper.CategoriasMapper;
 import com.example.springwebrest.rest.categoria.models.Categoria;
 import com.example.springwebrest.rest.categoria.services.CategoriaServices;
+import com.example.springwebrest.utils.pagination.PageResponse;
+import com.example.springwebrest.utils.pagination.PaginationLinksUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/categorias")
@@ -30,8 +34,21 @@ public class CategoriasRestController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<Categoria>> getAllCategorias(){
-        return ResponseEntity.ok(categoriaServices.findAll());
+    public ResponseEntity<PageResponse<Categoria>> getAllCategorias(
+            @RequestParam(required = false) Optional<String> tipo,
+            @RequestParam(required = false) Optional<Boolean> isDeleted,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction,
+            HttpServletRequest request
+            ){
+        Sort sort = direction.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(request.getRequestURL().toString());
+        Page<Categoria> pageResult = categoriaServices.findAll(tipo, isDeleted, PageRequest.of(page, size, sort));
+        return ResponseEntity.ok()
+                .header("link", PaginationLinksUtils.createLinkHeader(pageResult, uriBuilder))
+                .body(PageResponse.of(pageResult, sortBy, direction));
     }
 
     @GetMapping("/{id}")

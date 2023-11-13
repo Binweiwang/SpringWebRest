@@ -86,8 +86,10 @@ public class FunkoController {
 
         log.info("Actualizando imagen de producto por id: " + id);
 
+
+
         // Buscamos la raqueta
-        if (!file.isEmpty()) {
+        if (!file.isEmpty() && file.getContentType().equals("image/jpeg")  || file.getContentType().equals("image/png") || file.getContentType().equals("image/jpg")) {
             // Actualizamos el producto
             return ResponseEntity.ok(funkoServices.updateImage(id, file, true));
 

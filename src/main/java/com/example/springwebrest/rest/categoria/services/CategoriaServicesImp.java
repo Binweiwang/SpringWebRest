@@ -7,9 +7,13 @@ import com.example.springwebrest.rest.categoria.mapper.CategoriasMapper;
 import com.example.springwebrest.rest.categoria.models.Categoria;
 import com.example.springwebrest.rest.categoria.repository.CategoriaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 @Service
 public class CategoriaServicesImp implements CategoriaServices {
@@ -23,8 +27,19 @@ public class CategoriaServicesImp implements CategoriaServices {
     }
 
     @Override
-    public List<Categoria> findAll() {
-        return categoriaRepository.findAll();
+    public Page<Categoria> findAll(Optional<String> tipo, Optional<Boolean> isDeleted, Pageable pageable) {
+        Specification<Categoria> specTipoCategoria = (root, query, criteriaBuilder) ->
+                tipo.map(m -> criteriaBuilder.like(criteriaBuilder.lower(root.get("nombre")), "%" + m.toLowerCase() + "%"))
+                        .orElseGet(() -> criteriaBuilder.isTrue(criteriaBuilder.literal(true)));
+
+        // Criterio de búsqueda por borrado
+        Specification<Categoria> specIsDeleted = (root, query, criteriaBuilder) ->
+                isDeleted.map(m -> criteriaBuilder.equal(root.get("isDeleted"), m))
+                        .orElseGet(() -> criteriaBuilder.isTrue(criteriaBuilder.literal(true)));
+
+        Specification<Categoria> criterio = Specification.where(specTipoCategoria)
+                .and(specIsDeleted);
+        return categoriaRepository.findAll(criterio, pageable);
     }
 
     @Override

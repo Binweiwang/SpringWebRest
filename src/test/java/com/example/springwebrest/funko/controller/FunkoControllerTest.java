@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
@@ -37,14 +38,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @AutoConfigureJsonTesters
 @ExtendWith(MockitoExtension.class)
 class FunkoControllerTest {
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
     @MockBean
     private final FunkoServices funkoService;
     @MockBean
     private final FunkoMapper funkoMapper;
     private final String myEndpoint = "/funkos";
     private final FunkoResponseDto funkoResponseDto = FunkoResponseDto.builder()
-            .id(2L)
+            .id(1L)
             .name("Funko")
             .price(100.0)
             .quantity(10)
@@ -186,7 +187,7 @@ class FunkoControllerTest {
                                 .content(jacksonRequestDto.write(funkoCreateRequest).getJson()))
                 .andReturn().getResponse();
         FunkoResponseDto res = mapper.readValue(response.getContentAsString(),
-                mapper.registerModule(new JavaTimeModule()).getTypeFactory().constructType(FunkoResponseDto.class));
+                mapper.getTypeFactory().constructType(FunkoResponseDto.class));
 
         assertAll("Guardar un funko",
                 () -> assertEquals(response.getStatus(), HttpStatus.CREATED.value()),
@@ -198,7 +199,7 @@ class FunkoControllerTest {
 
     @Test
     void putFunko() throws Exception {
-        when(funkoService.update(1L, funkoUpdateRequest))
+        when(funkoService.update(any(Long.class), any(FunkoUpdateRequest.class)))
                 .thenReturn(funkoResponseDto);
 
 
@@ -208,7 +209,7 @@ class FunkoControllerTest {
                                 .content(mapper.writeValueAsString(funkoUpdateRequest)))
                 .andReturn().getResponse();
         FunkoResponseDto res = mapper.readValue(response.getContentAsString(),
-                mapper.registerModule(new JavaTimeModule()).getTypeFactory().constructType(FunkoResponseDto.class));
+                mapper.getTypeFactory().constructType(FunkoResponseDto.class));
 
         assertAll("Actualizar un funko",
                 () -> assertEquals(response.getStatus(), HttpStatus.OK.value()),
@@ -220,16 +221,18 @@ class FunkoControllerTest {
 
     @Test
     void patchFunko() throws Exception {
-        when(funkoService.update(1L, funkoUpdateRequest))
+        when(funkoService.update(any(Long.class), any(FunkoUpdateRequest.class)))
                 .thenReturn(funkoResponseDto);
 
         MockHttpServletResponse response = mockMvc.perform(
                         patch(myEndpoint + "/1")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.registerModule(new JavaTimeModule()).writeValueAsString(funkoUpdateRequest)))
+                                .content(mapper.writeValueAsString(funkoUpdateRequest)))
                 .andReturn().getResponse();
+
         FunkoResponseDto res = mapper.readValue(response.getContentAsString(),
-                mapper.registerModule(new JavaTimeModule()).getTypeFactory().constructType(FunkoResponseDto.class));
+                mapper.getTypeFactory().constructType(FunkoResponseDto.class));
+
 
         assertAll("Actualizar un funko",
                 () -> assertEquals(response.getStatus(), HttpStatus.OK.value()),
@@ -260,7 +263,7 @@ class FunkoControllerTest {
                         put(myEndpoint + "/1")
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.registerModule(new JavaTimeModule()).writeValueAsString(funkoUpdateRequestError)))
+                                .content(mapper.writeValueAsString(funkoUpdateRequestError)))
                 .andReturn().getResponse();
 
         assertAll(

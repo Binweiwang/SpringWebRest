@@ -75,7 +75,6 @@ public class FileSystemStorageService implements StorageService {
         } catch (IOException e) {
             throw new StorageInternal("Fallo al leer ficheros almacenados " + e);
         }
-
     }
 
 

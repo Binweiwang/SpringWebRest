@@ -13,13 +13,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Paths;
 
@@ -41,7 +35,7 @@ public class StorageControllerTest {
     private StorageService storageService;
 
     @Test
-    public void serverFileTest() throws Exception {
+    public void serverFile() throws Exception {
 
         Resource file = new UrlResource(Paths.get("src/test/resources/funko.jpg").toUri());
 
@@ -56,7 +50,6 @@ public class StorageControllerTest {
     @Test
     void ServerFileNotContentTypeTest() throws Exception {
         byte[] content = "Contenido de prueba".getBytes();
-        MockMultipartFile mockFile = new MockMultipartFile("file", "test.txt", null, content);
 
         when(storageService.loadAsResource(anyString())).thenReturn(new ByteArrayResource(content));
 
