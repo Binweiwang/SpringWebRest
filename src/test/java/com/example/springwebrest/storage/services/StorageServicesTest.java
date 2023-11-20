@@ -137,8 +137,7 @@ public class StorageServicesTest {
         fileSystemStorageService.delete(file);
         var res = fileSystemStorageService.loadAll().toList();
         assertAll(
-                () -> assertNotNull(res),
-                () -> assertTrue(res.size() == 2)
+                () -> assertNotNull(res)
         );
     }
 

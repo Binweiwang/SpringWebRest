@@ -1,7 +1,6 @@
 package com.example.springwebrest.rest.categoria.controllers;
 
 import com.example.springwebrest.rest.categoria.dto.CategoriaRequest;
-import com.example.springwebrest.rest.categoria.mapper.CategoriasMapper;
 import com.example.springwebrest.rest.categoria.models.Categoria;
 import com.example.springwebrest.rest.categoria.services.CategoriaServices;
 import com.example.springwebrest.utils.pagination.PageResponse;
@@ -25,12 +24,11 @@ import java.util.*;
 @RequestMapping("/categorias")
 public class CategoriasRestController {
     private final CategoriaServices categoriaServices;
-    private final CategoriasMapper categoriasMapper;
-
+    private final PaginationLinksUtils paginationLinksUtils;
     @Autowired
-    public CategoriasRestController(CategoriaServices categoriaServices, CategoriasMapper categoriasMapper) {
+    public CategoriasRestController(CategoriaServices categoriaServices, PaginationLinksUtils paginationLinksUtils) {
         this.categoriaServices = categoriaServices;
-        this.categoriasMapper = categoriasMapper;
+        this.paginationLinksUtils = paginationLinksUtils;
     }
 
     @GetMapping()
@@ -47,7 +45,7 @@ public class CategoriasRestController {
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(request.getRequestURL().toString());
         Page<Categoria> pageResult = categoriaServices.findAll(tipo, isDeleted, PageRequest.of(page, size, sort));
         return ResponseEntity.ok()
-                .header("link", PaginationLinksUtils.createLinkHeader(pageResult, uriBuilder))
+                .header("link", paginationLinksUtils.createLinkHeader(pageResult, uriBuilder))
                 .body(PageResponse.of(pageResult, sortBy, direction));
     }
 

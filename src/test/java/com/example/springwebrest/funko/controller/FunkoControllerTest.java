@@ -8,6 +8,7 @@ import com.example.springwebrest.rest.funko.exceptions.FunkoNotFound;
 import com.example.springwebrest.rest.funko.mapper.FunkoMapper;
 import com.example.springwebrest.rest.funko.models.Funko;
 import com.example.springwebrest.rest.funko.services.FunkoServices;
+import com.example.springwebrest.utils.pagination.PageResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -26,6 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -119,24 +125,19 @@ class FunkoControllerTest {
 
     @Test
     void getFunkos() throws Exception {
-        when(funkoService.findAll())
-                .thenReturn(List.of(funko1, funko2));
-
-        when(funkoMapper.toResponses(List.of(funko1, funko2)))
-                .thenReturn(List.of(funkoResponseDto, funkoResponseDto));
+        List<FunkoResponseDto> funkos = List.of(funkoResponseDto);
+        when(funkoService.findAll(any(Optional.class), any(Optional.class), any(Optional.class), any(Optional.class), any(PageRequest.class))).thenReturn(new PageImpl<>(funkos));
 
         MockHttpServletResponse response = mockMvc.perform(
-                        get(myEndpoint)
-                                .accept(MediaType.APPLICATION_JSON))
+                get(myEndpoint)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse();
 
-        List<FunkoResponseDto> res = mapper.readValue(response.getContentAsString(), mapper.registerModule(new JavaTimeModule()).getTypeFactory().constructCollectionType(List.class, FunkoResponseDto.class));
+        PageResponse<FunkoResponseDto> res = mapper.readValue(response.getContentAsString(), mapper.getTypeFactory().constructParametricType(PageResponse.class, FunkoResponseDto.class));
 
-        assertAll("Obtener todos los funkos",
-                () -> assertEquals(response.getStatus(), HttpStatus.OK.value()),
-                () -> assertTrue(response.getContentAsString().contains("\"id\":" + funkoResponseDto.getId())),
-                () -> assertTrue(res.size() > 0),
-                () -> assertTrue(res.stream().anyMatch(r -> r.getId().equals(funkoResponseDto.getId())))
+        assertAll(
+                () -> assertEquals(HttpStatus.OK.value(), response.getStatus()),
+                () -> assertEquals(1, res.content().size())
         );
     }
 

@@ -24,11 +24,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -57,8 +60,22 @@ public class FunkoServicesImp implements FunkoServices {
 
 
     @Override
-    public List<Funko> findAll() {
-        return funkoRepository.findAll();
+    public Page<FunkoResponseDto> findAll(Optional<String> name, Optional<Double> price, Optional<Integer> quantity, Optional<String> categoria, Pageable pageable) {
+        Specification<Funko> specCategoria = ((root, criteriaQuery, criteriaBuilder) -> categoria.map(c -> criteriaBuilder.equal(
+                root.get("categoria").get("tipo"),
+                c)).orElseGet(() -> criteriaBuilder.isTrue(criteriaBuilder.literal(true))));
+        Specification<Funko> specName = ((root, criteriaQuery, criteriaBuilder) -> name.map(n -> criteriaBuilder.like(
+                criteriaBuilder.lower(root.get("name")),
+                "%" + n.toLowerCase() + "%")).orElseGet(() -> criteriaBuilder.isTrue(criteriaBuilder.literal(true))));
+        Specification<Funko> specPrice = ((root, criteriaQuery, criteriaBuilder) -> price.map(p -> criteriaBuilder.equal(
+                root.get("price"),
+                p)).orElseGet(() -> criteriaBuilder.isTrue(criteriaBuilder.literal(true))));
+        Specification<Funko> specQuantity = ((root, criteriaQuery, criteriaBuilder) -> quantity.map(q -> criteriaBuilder.equal(
+                root.get("quantity"),
+                q)).orElseGet(() -> criteriaBuilder.isTrue(criteriaBuilder.literal(true))));
+        Specification<Funko> spec = Specification.where(specCategoria).and(specName).and(specPrice).and(specQuantity);
+        return funkoRepository.findAll(spec, pageable).map(funkoMapper::toFunko);
+
     }
 
     @Override

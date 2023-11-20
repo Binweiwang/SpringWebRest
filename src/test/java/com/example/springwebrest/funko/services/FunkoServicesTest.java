@@ -23,10 +23,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.print.Pageable;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -98,24 +105,30 @@ public class FunkoServicesTest {
     @InjectMocks
     private FunkoServicesImp funkoService;
 
-
-    @Test
-    void findAll() {
-        when(repository.findAll()).thenReturn(ListaFunkos);
-
-        List<Funko> funkos = funkoService.findAll();
-
-        assertAll("Obtener todos los funkos",
-                () -> assertEquals(3, funkos.size()),
-                () -> assertEquals("Funko 1", funkos.get(0).getName()),
-                () -> assertEquals("Funko 2", funkos.get(1).getName()),
-                () -> assertEquals("Funko 3", funkos.get(2).getName())
-        );
-    }
-
     @BeforeEach
     void setUp(){
         funkoService.setWebSocketService(webSocketHandler);
+    }
+
+
+    @Test
+    void findAll() {
+        var funkoList = List.of(funko,funko);
+        var pageable = PageRequest.of(0, 10, Sort.by("id"));
+        var page = new PageImpl<>(funkoList);
+
+        when(repository.findAll(any(Specification.class),eq(pageable))).thenReturn(page);
+        when(funkoMapper.toFunko(any(Funko.class))).thenReturn(funkoResponseDto);
+
+        Page<FunkoResponseDto> funkoResponseDtoPage = funkoService.findAll(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), pageable);
+
+        assertAll("findall",
+                () -> assertEquals(2, funkoResponseDtoPage.getTotalElements()),
+                () -> assertEquals(1, funkoResponseDtoPage.getTotalPages()),
+                () -> assertEquals(2, funkoResponseDtoPage.getContent().size())
+                );
+
+
     }
 
     @Test

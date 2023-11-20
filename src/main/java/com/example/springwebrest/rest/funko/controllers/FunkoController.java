@@ -5,14 +5,21 @@ import com.example.springwebrest.rest.funko.dto.FunkoResponseDto;
 import com.example.springwebrest.rest.funko.dto.FunkoUpdateRequest;
 import com.example.springwebrest.rest.funko.mapper.FunkoMapper;
 import com.example.springwebrest.rest.funko.services.FunkoServices;
+import com.example.springwebrest.utils.pagination.PageResponse;
+import com.example.springwebrest.utils.pagination.PaginationLinksUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,27 +28,42 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @Slf4j
 @RequestMapping("/funkos")
 public class FunkoController {
     private final FunkoServices funkoServices;
-    private final FunkoMapper funkoMapper;
+    private final PaginationLinksUtils paginationLinksUtils;
 
     @Autowired
-    public FunkoController(FunkoServices funkoServices, FunkoMapper funkoMapper) {
+    public FunkoController(FunkoServices funkoServices, FunkoMapper funkoMapper, PaginationLinksUtils paginationLinksUtils) {
         this.funkoServices = funkoServices;
-        this.funkoMapper = funkoMapper;
+        this.paginationLinksUtils = paginationLinksUtils;
     }
 
     @GetMapping()
-    public ResponseEntity<List<FunkoResponseDto>> getFunkos() {
-        return ResponseEntity.ok(funkoMapper.toResponses(funkoServices.findAll()));
+    public ResponseEntity<PageResponse<FunkoResponseDto>> getFunkos(
+            @RequestParam(required = false) Optional<String> name,
+            @RequestParam(required = false) Optional<Double> price,
+            @RequestParam(required = false) Optional<Integer> quantity,
+            @RequestParam(required = false) Optional<String> categoria,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction,
+            HttpServletRequest request
+    ) {
+        Sort sort =  direction.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(request.getRequestURL().toString());
+        Page<FunkoResponseDto> result = funkoServices.findAll(name,price,quantity,categoria, pageable);
+        return ResponseEntity.ok()
+                .header("link", paginationLinksUtils.createLinkHeader(result, uriBuilder))
+                .body(PageResponse.of(result, sortBy, direction));
     }
 
     @GetMapping("/{id}")
