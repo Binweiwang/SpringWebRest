@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/pedidos") // Es la ruta del controlador
+@RequestMapping("/pedidos")
 @Slf4j
 public class PedidosRestController {
     private final PedidosService pedidosService;

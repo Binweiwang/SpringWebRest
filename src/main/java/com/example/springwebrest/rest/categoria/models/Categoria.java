@@ -30,6 +30,5 @@ public class Categoria {
     private LocalDateTime createdAt;
     @LastModifiedDate
     private LocalDateTime updatedAt;
-    @Builder.Default
-    private boolean isActive = true;
+    private boolean isActive;
 }

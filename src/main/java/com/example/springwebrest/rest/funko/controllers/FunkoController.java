@@ -34,7 +34,7 @@ import java.util.*;
 
 @RestController
 @Slf4j
-@RequestMapping("/funkos")
+@RequestMapping("funkos")
 public class FunkoController {
     private final FunkoServices funkoServices;
     private final PaginationLinksUtils paginationLinksUtils;
@@ -107,9 +107,6 @@ public class FunkoController {
             @RequestPart("file") MultipartFile file) {
 
         log.info("Actualizando imagen de producto por id: " + id);
-
-
-
         // Buscamos la raqueta
         if (!file.isEmpty() && file.getContentType().equals("image/jpeg")  || file.getContentType().equals("image/png") || file.getContentType().equals("image/jpg")) {
             // Actualizamos el producto

@@ -18,5 +18,5 @@ public class FunkoResponseDto {
     private Integer quantity;
     private String image;
     @NotEmpty(message = "Categoria no puede estar vacio")
-    private Categoria categoria;
+    private String categoria;
 }

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>List of Funkos</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+
+<div class="container mt-4">
+    <div th:replace="~{funkos/header.html:: header}"></div>
+    <p class="text-muted">Logged in as: <span th:text="${username}"></span> | Last login: <span
+            th:text="${lastLoginDate}"></span></p>
+    <p class="text-muted">Number of visits: <span th:text="${numVisitas}"></span></p>
+
+
+    <h1 th:text="${welcomeMessage}"></h1>
+    <form action="/productos/" class="mb-3" method="get">
+        <div class="input-group">
+            <input class="form-control" id="search" name="search" th:value="${search}" type="text">
+            <div class="input-group-append">
+                <button class="btn btn-primary" type="submit">Buscar</button>
+            </div>
+        </div>
+    </form>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Categoria</th>
+            <th>Nombre</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Imagen</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="funko : ${funkos.content}">
+            <td th:text="${funko.id}"></td>
+            <td th:text="${funko.categoria}"></td>
+            <td th:text="${funko.name}"></td>
+            <td th:text="${funko.price}"></td>
+            <td th:text="${funko.quantity}"></td>
+            <td>
+                <img alt="Imagen del producto" height="50" th:src="${funko.image}" width="50">
+            </td>
+            <td>
+                <a class="btn btn-primary btn-sm" th:href="@{/details/{id}(id=${funko.id})}">Detalles</a>
+                <a class="btn btn-secondary btn-sm" th:href="@{/update/{id}(id=${funko.id})}">Editar</a>
+                <a class="btn btn-info btn-sm" th:href="@{/update-image/{id}(id=${funko.id})}">Imagen</a>
+                <a class="btn btn-danger btn-sm" th:href="@{/delete/{id}(id=${funko.id})}">Eliminar</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            <li class="page-item" th:classappend="${funkos.first ? 'disabled' : ''}">
+                <a class="page-link"
+                   th:href="@{${funkos.first ? '#' : '/index'}(page=0, size=${funkos.size}, sort=${funkos.pageable.sort})}">&laquo;</a>
+            </li>
+            <li class="page-item" th:classappend="${funkos.first ? 'disabled' : ''}">
+                <a class="page-link"
+                   th:href="@{${funkos.first ? '#' : '/index'}(page=${funkos.number - 1}, size=${funkos.size}, sort=${funkos.pageable.sort})}">Anterior</a>
+            </li>
+            <li class="page-item" th:classappend="${funkos.last ? 'disabled' : ''}">
+                <a class="page-link"
+                   th:href="@{${funkos.last ? '#' : '/index'}(page=${funkos.number + 1}, size=${funkos.size}, sort=${funkos.pageable.sort})}">Siguiente</a>
+            </li>
+            <li class="page-item" th:classappend="${funkos.last ? 'disabled' : ''}">
+                <a class="page-link"
+                   th:href="@{${funkos.last ? '#' : '/index'}(page=${funkos.totalPages - 1}, size=${funkos.size}, sort=${funkos.pageable.sort})}">&raquo;</a>
+            </li>
+        </ul>
+    </nav>
+    <a class="btn btn-success" href="/create">Nuevo Producto</a>
+
+    <!-- Incluir el fragmento del footer -->
+    <p class="mt-4 text-center" style="font-size: smaller;">
+        <span>Nº de visitas: </span><span th:text="${numVisitas}"></span>
+        <span>, desde tu último login: </span>
+        <span th:text="${lastLoginDate}"></span>
+    </p>
+
+</div>
+<div th:replace="~{funkos/footer.html :: footer}"></div>
+<!-- Bootstrap JS and Popper.js -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

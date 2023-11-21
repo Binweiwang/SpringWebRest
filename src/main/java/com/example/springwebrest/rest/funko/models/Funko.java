@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "funkos")
 public class Funko {
-    public static final String IMAGE_DEFAULT ="https://via.placeholder.com/150";
+    public static final String IMAGE_DEFAULT ="https://www.laopticadeantonio.es/wp-content/uploads/2013/12/150x150.gif";
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

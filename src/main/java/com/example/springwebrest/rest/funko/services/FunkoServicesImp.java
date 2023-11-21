@@ -127,7 +127,7 @@ public class FunkoServicesImp implements FunkoServices {
     public Categoria checkCategoria(String nombreCategoria) {
         var categoria = categoriaRepository.findByTipoEqualsIgnoreCase(nombreCategoria);
         // Buscamos la categoría por su nombre, debe existir y no estar borrada
-        if (categoria.isEmpty() || categoria.get().isActive()) {
+        if (categoria.isEmpty() || !categoria.get().isActive()) {
             throw new FunkoBadRequest("La categoría " + nombreCategoria + " no existe o está borrada");
         }
         return categoria.get();

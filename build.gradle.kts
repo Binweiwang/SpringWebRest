@@ -51,7 +51,10 @@ dependencies {
     implementation("io.swagger.core.v3:swagger-annotations:2.2.18")
     //
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-
+    // thymeleaf
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    // Bootstrap
+    implementation("org.webjars:bootstrap:4.6.2")
 
 }
 

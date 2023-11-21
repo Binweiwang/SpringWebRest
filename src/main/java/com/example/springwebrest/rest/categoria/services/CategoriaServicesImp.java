@@ -12,9 +12,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+
 @Service
 public class CategoriaServicesImp implements CategoriaServices {
     private final CategoriaRepository categoriaRepository;
@@ -34,7 +35,7 @@ public class CategoriaServicesImp implements CategoriaServices {
 
         // Criterio de búsqueda por borrado
         Specification<Categoria> specIsDeleted = (root, query, criteriaBuilder) ->
-                isDeleted.map(m -> criteriaBuilder.equal(root.get("isDeleted"), m))
+                isDeleted.map(m -> criteriaBuilder.equal(root.get("isActive"), m))
                         .orElseGet(() -> criteriaBuilder.isTrue(criteriaBuilder.literal(true)));
 
         Specification<Categoria> criterio = Specification.where(specTipoCategoria)

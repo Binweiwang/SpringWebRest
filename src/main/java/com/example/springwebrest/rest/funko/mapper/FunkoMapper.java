@@ -19,7 +19,7 @@ public class FunkoMapper {
                 .price(funko.getPrice())
                 .quantity(funko.getQuantity())
                 .image(funko.getImage())
-                .categoria(funko.getCategoria())
+                .categoria(funko.getCategoria().getTipo())
                 .build();
     }
     public Funko toFunko(FunkoUpdateRequest request, Funko Funko, Categoria categoria) {
