@@ -7,14 +7,13 @@
     <link href="/images/favicon.png" rel="icon" type="image/png">
 </head>
 <body>
+<div th:replace="~{funkos/header.html :: header}"></div>
 <div class="container">
     <!-- Incluir el fragmento del header -->
-    <div th:replace="~{funkos/header.html :: header}"></div>
-
     <h1>Actualizar Funko</h1>
     <!-- Agregando th:action="@{/productos/update/{id}(id=${id})}" en el formulario, aseguras que la ruta de acción sea
     la correcta y se envíe la solicitud POST correctamente al controlador. -->
-    <form th:action="@{/update/{id}(id = ${funko.getId()})}" method="post" th:object="${funko}">
+    <form method="post" th:action="@{/update/{id}(id = ${funko.getId()})}" th:object="${funko}">
         <div class="form-group">
             <label for="marca">Nombre:</label>
             <input class="form-control" id="marca" name="marca" th:field="*{name}" type="text">
@@ -50,7 +49,6 @@
         <a class="btn btn-secondary mx-2" href="/">Volver</a>
     </form>
 </div>
-
 <!-- Incluir el fragmento del footer -->
 <div th:replace="~{funkos/footer.html :: footer}"></div>
 

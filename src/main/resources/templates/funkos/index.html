@@ -7,17 +7,13 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-
-
+<div th:replace="~{funkos/header.html:: header}"></div>
 <div class="container mt-4">
-    <div th:replace="~{funkos/header.html:: header}"></div>
     <p class="text-muted">Logged in as: <span th:text="${username}"></span> | Last login: <span
             th:text="${lastLoginDate}"></span></p>
     <p class="text-muted">Number of visits: <span th:text="${numVisitas}"></span></p>
-
-
     <h1 th:text="${welcomeMessage}"></h1>
-    <form action="/productos/" class="mb-3" method="get">
+    <form action="/" class="mb-3" method="get">
         <div class="input-group">
             <input class="form-control" id="search" name="search" th:value="${search}" type="text">
             <div class="input-group-append">
@@ -60,31 +56,29 @@
         <ul class="pagination">
             <li class="page-item" th:classappend="${funkos.first ? 'disabled' : ''}">
                 <a class="page-link"
-                   th:href="@{${funkos.first ? '#' : '/index'}(page=0, size=${funkos.size}, sort=${funkos.pageable.sort})}">&laquo;</a>
+                   th:href="@{${funkos.first ? '#' : '/'}(page=0, size=${funkos.size}, sort=${funkos.pageable.sort})}">&laquo;</a>
             </li>
             <li class="page-item" th:classappend="${funkos.first ? 'disabled' : ''}">
                 <a class="page-link"
-                   th:href="@{${funkos.first ? '#' : '/index'}(page=${funkos.number - 1}, size=${funkos.size}, sort=${funkos.pageable.sort})}">Anterior</a>
+                   th:href="@{${funkos.first ? '#' : '/'}(page=${funkos.number - 1}, size=${funkos.size}, sort=${funkos.pageable.sort})}">Anterior</a>
             </li>
             <li class="page-item" th:classappend="${funkos.last ? 'disabled' : ''}">
                 <a class="page-link"
-                   th:href="@{${funkos.last ? '#' : '/index'}(page=${funkos.number + 1}, size=${funkos.size}, sort=${funkos.pageable.sort})}">Siguiente</a>
+                   th:href="@{${funkos.last ? '#' : '/'}(page=${funkos.number + 1}, size=${funkos.size}, sort=${funkos.pageable.sort})}">Siguiente</a>
             </li>
             <li class="page-item" th:classappend="${funkos.last ? 'disabled' : ''}">
                 <a class="page-link"
-                   th:href="@{${funkos.last ? '#' : '/index'}(page=${funkos.totalPages - 1}, size=${funkos.size}, sort=${funkos.pageable.sort})}">&raquo;</a>
+                   th:href="@{${funkos.last ? '#' : '/'}(page=${funkos.totalPages - 1}, size=${funkos.size}, sort=${funkos.pageable.sort})}">&raquo;</a>
             </li>
         </ul>
     </nav>
     <a class="btn btn-success" href="/create">Nuevo Producto</a>
-
     <!-- Incluir el fragmento del footer -->
     <p class="mt-4 text-center" style="font-size: smaller;">
         <span>Nº de visitas: </span><span th:text="${numVisitas}"></span>
         <span>, desde tu último login: </span>
         <span th:text="${lastLoginDate}"></span>
     </p>
-
 </div>
 <div th:replace="~{funkos/footer.html :: footer}"></div>
 <!-- Bootstrap JS and Popper.js -->

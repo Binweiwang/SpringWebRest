@@ -35,6 +35,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     // Spring Data JPA para MongoDB
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
+    // Spring Data JPA para seguridad
+    implementation("org.springframework.boot:spring-boot-starter-security")
     // Lombok
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

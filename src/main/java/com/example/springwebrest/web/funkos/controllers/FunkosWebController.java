@@ -34,7 +34,7 @@ public class FunkosWebController {
     private final FunkoServices funkoService;
     private final CategoriaServicesImp categoriaService;
 
-//    private final UserStore userSession;
+    private final UserStore userSession;
 
     private final MessageSource messageSource;
 
@@ -46,83 +46,83 @@ public class FunkosWebController {
         this.funkoService = funkoService;
         this.categoriaService = categoriaService;
         this.paginationLinksUtils = paginationLinksUtils;
-//        this.userSession = userSession;
+        this.userSession = userSession;
         this.messageSource = messageSource;
 
     }
 
-//    @GetMapping("/login")
-//    public String login(HttpSession session) {
-//        if (isLoggedAndSessionIsActive(session)) {
-//            return "redirect:/";
-//        }
-//        return "funkos/login";
-//    }
+    @GetMapping("/login")
+    public String login(HttpSession session) {
+        if (isLoggedAndSessionIsActive(session)) {
+            return "redirect:/";
+        }
+        return "funkos/login";
+    }
 
-//    @PostMapping("/login")
-//    public String login(@RequestParam("password") String password, @RequestParam("username") String username,HttpSession session) {
-//        if ("pass".equals(password)) {
-//            userSession.setLastLogin(new Date());
-//            userSession.setLogged(true);
-//            userSession.setUsername(username);
-//            session.setAttribute("userSession", userSession);
-//            session.setMaxInactiveInterval(1800);
-//            return "redirect:/";
-//        } else {
-//            return "redirect:/login";
-//        }
-//    }
+    @PostMapping("/login")
+    public String login(@RequestParam("password") String password, @RequestParam("username") String username,HttpSession session) {
+        if ("pass".equals(password)) {
+            userSession.setLastLogin(new Date());
+            userSession.setLogged(true);
+            userSession.setUsername(username);
+            session.setAttribute("userSession", userSession);
+            session.setMaxInactiveInterval(1800);
+            return "redirect:/";
+        } else {
+            return "redirect:/login";
+        }
+    }
 
-//    @GetMapping("/logout")
-//    public String logout(HttpSession session) {
-//        session.invalidate();
-//        return "redirect:/login";
-//    }
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/login";
+    }
 
     @GetMapping("/")
     public String indexListFunkos(
             HttpSession session,
             Model model,
             @RequestParam(required = false) Optional<String> categoria,
-            @RequestParam(required = false) Optional<String> nombre,
             @RequestParam(required = false) Optional<Double> precio,
             @RequestParam(required = false) Optional<Integer> cantidad,
+            @RequestParam(value = "search", required = false) Optional<String> search,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(defaultValue = "id") String orderBy,
-            @RequestParam(defaultValue = "ASC") String order,
+            @RequestParam(defaultValue = "asc") String order,
             Locale locale
     ) {
 
-//        if (!isLoggedAndSessionIsActive(session)) {
-//            return "redirect:/login";
-//        }
-//
-//        UserStore sessionData = (UserStore) session.getAttribute("userSession");
-//        sessionData.incrementLoginCount();
-//        var numVisitas = sessionData.getLoginCount();
-//        var lastLogin = sessionData.getLastLogin();
-//        var username = sessionData.getUsername();
-//        var localizedLastLoginDate = getLocalizedDate(lastLogin, locale);
+        if (!isLoggedAndSessionIsActive(session)) {
+            return "redirect:/login";
+        }
+
+        UserStore sessionData = (UserStore) session.getAttribute("userSession");
+        sessionData.incrementLoginCount();
+        var numVisitas = sessionData.getLoginCount();
+        var lastLogin = sessionData.getLastLogin();
+        var username = sessionData.getUsername();
+        var localizedLastLoginDate = getLocalizedDate(lastLogin, locale);
 
         Sort sort = order.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(orderBy).ascending() : Sort.by(orderBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        var funkos = funkoService.findAll(nombre, precio, cantidad, categoria, pageable);
+        var funkos = funkoService.findAll(search, precio, cantidad, categoria, pageable);
         String welcomeMessage = messageSource.getMessage("welcome.message", null, locale);
         model.addAttribute("welcomeMessage", welcomeMessage);
         model.addAttribute("funkos", funkos);
-//        model.addAttribute("numVisitas", numVisitas);
-//        model.addAttribute("lastLoginDate", localizedLastLoginDate);
-//        model.addAttribute("username", username);
+        model.addAttribute("numVisitas", numVisitas);
+        model.addAttribute("lastLoginDate", localizedLastLoginDate);
+        model.addAttribute("username", username);
         String categoriaStr = categoria.isPresent() ? categoria.get() : "";
-        String nombreStr = nombre.isPresent() ? nombre.get() : "";
+        String nombreStr = search.isPresent() ? search.get() : "";
         String precioStr = precio.isPresent() ? precio.get().toString() : "";
         String cantidadStr = cantidad.isPresent() ? cantidad.get().toString() : "";
 
 
-        model.addAttribute("paginationLinks", paginationLinksUtils.createLinkHeader(funkos, UriComponentsBuilder.fromUriString("/").queryParam("categoria", categoriaStr).queryParam("nombre", nombreStr).queryParam("precio", precioStr).queryParam("cantidad", cantidadStr)));
+        model.addAttribute("paginationLinks", paginationLinksUtils.createLinkHeader(funkos, UriComponentsBuilder.fromUriString("/").queryParam("categoria", categoriaStr).queryParam("name", nombreStr).queryParam("price", precioStr).queryParam("quantity", cantidadStr)));
         model.addAttribute("categoria", categoriaStr);
-        model.addAttribute("nombre", nombreStr);
+        model.addAttribute("nombre", search.orElse(""));
         model.addAttribute("precio", precioStr);
         model.addAttribute("cantidad", cantidadStr);
         return "funkos/index";
@@ -130,9 +130,9 @@ public class FunkosWebController {
 
     @GetMapping("/details/{id}")
     public String detailsFunko(@PathVariable("id") Long id, Model model, HttpSession session){
-//        if (!isLoggedAndSessionIsActive(session)) {
-//            return "redirect:/login";
-//        }
+        if (!isLoggedAndSessionIsActive(session)) {
+            return "redirect:/login";
+        }
         var funko = funkoService.findById(id);
         model.addAttribute("funko", funko);
         return "funkos/details";
@@ -140,25 +140,25 @@ public class FunkosWebController {
 
     @GetMapping("/delete/{id}")
     public String deleteFunko(@PathVariable("id") Long id, HttpSession session){
-//        if (!isLoggedAndSessionIsActive(session)) {
-//            return "redirect:/login";
-//        }
+        if (!isLoggedAndSessionIsActive(session)) {
+            return "redirect:/login";
+        }
         funkoService.deleteById(id);
         return "redirect:/";
     }
 
     @GetMapping("/create")
     public String createFunko(
-//            HttpSession session,
+            HttpSession session,
             Model model,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "1000") Integer size,
             @RequestParam(defaultValue = "id") String orderBy,
             @RequestParam(defaultValue = "ASC") String order
     ){
-//        if (!isLoggedAndSessionIsActive(session)) {
-//            return "redirect:/login";
-//        }
+        if (!isLoggedAndSessionIsActive(session)) {
+            return "redirect:/login";
+        }
         Sort sort = order.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(orderBy).ascending() : Sort.by(orderBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
         var categorias = categoriaService.findAll(Optional.empty(), Optional.of(true), pageable).map(Categoria::getTipo);
@@ -169,14 +169,14 @@ public class FunkosWebController {
 
     @PostMapping("/create")
     public String createPost(
-//            HttpSession session,
+            HttpSession session,
             @Valid @ModelAttribute("funko") FunkoCreateRequest funkoCreateRequest,
             BindingResult result,
             Model model
     ){
-//        if (!isLoggedAndSessionIsActive(session)) {
-//            return "redirect:/login";
-//        }
+        if (!isLoggedAndSessionIsActive(session)) {
+            return "redirect:/login";
+        }
         if(result.hasErrors()){
             var categorias = categoriaService.findAll(Optional.empty(), Optional.of(true), Pageable.unpaged()).map(Categoria::getTipo);
             model.addAttribute("categorias", categorias);
@@ -190,12 +190,12 @@ public class FunkosWebController {
     @GetMapping("/update/{id}")
     public String editFunko(
             @PathVariable("id") Long id,
-            Model model
-//            HttpSession session
+            Model model,
+            HttpSession session
     ){
-//        if (!isLoggedAndSessionIsActive(session)) {
-//            return "redirect:/login";
-//        }
+        if (!isLoggedAndSessionIsActive(session)) {
+            return "redirect:/login";
+        }
         var funko = funkoService.findById(id);
         var categorias = categoriaService.findAll(Optional.empty(), Optional.of(true), Pageable.unpaged()).map(Categoria::getTipo);
         model.addAttribute("funko", funko);
@@ -206,15 +206,15 @@ public class FunkosWebController {
 
     @PostMapping("/update/{id}")
     public String editPost(
-//            HttpSession session,
+            HttpSession session,
             @PathVariable("id") Long id,
             @Valid @ModelAttribute("funkoCreateDto") FunkoUpdateRequest funkoUpdateRequest,
             BindingResult result,
             Model model
     ){
-//        if (!isLoggedAndSessionIsActive(session)) {
-//            return "redirect:/login";
-//        }
+        if (!isLoggedAndSessionIsActive(session)) {
+            return "redirect:/login";
+        }
         if(result.hasErrors()){
             var categorias = categoriaService.findAll(Optional.empty(), Optional.of(true), Pageable.unpaged()).map(Categoria::getTipo);
             model.addAttribute("categorias", categorias);
@@ -225,7 +225,7 @@ public class FunkosWebController {
         return "redirect:/";
     }
 
-    @GetMapping("/edit-image/{id}")
+    @GetMapping("/update-image/{id}")
     public String formEditImage(
             @PathVariable("id") Long id,
             Model model,
@@ -236,10 +236,10 @@ public class FunkosWebController {
         }
         var funko = funkoService.findById(id);
         model.addAttribute("funko", funko);
-        return "funkos/edit-image";
+        return "funkos/update-image";
     }
 
-    @PostMapping("/edit-image/{id}")
+    @PostMapping("/update-image/{id}")
     public String editImage(
             @PathVariable("id") Long id,
             @RequestParam("imagen") MultipartFile imagen,
@@ -248,7 +248,7 @@ public class FunkosWebController {
         if (!isLoggedAndSessionIsActive(session)) {
             return "redirect:/login";
         }
-        funkoService.updateImage(id, imagen, false);
+        funkoService.updateImage(id, imagen, true);
         return "redirect:/";
     }
 
