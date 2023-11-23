@@ -57,6 +57,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     // Bootstrap
     implementation("org.webjars:bootstrap:4.6.2")
+    // JWT (Json Web Token)
+    implementation("com.auth0:java-jwt:4.4.0")
 
 }
 
