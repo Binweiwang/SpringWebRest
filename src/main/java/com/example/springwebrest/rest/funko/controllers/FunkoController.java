@@ -23,6 +23,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +35,7 @@ import java.util.*;
 
 @RestController
 @Slf4j
-@RequestMapping("funkos")
+@RequestMapping("${api.version}/funkos")
 public class FunkoController {
     private final FunkoServices funkoServices;
     private final PaginationLinksUtils paginationLinksUtils;
@@ -72,20 +73,24 @@ public class FunkoController {
     }
 
     @PostMapping()
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<FunkoResponseDto> postFunko(@Valid @RequestBody FunkoCreateRequest funko) {
         return ResponseEntity.status(HttpStatus.CREATED).body(funkoServices.save(funko));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<FunkoResponseDto> putFunko(@PathVariable Long id, @Valid @RequestBody FunkoUpdateRequest funko) {
       return ResponseEntity.ok(funkoServices.update(id, funko));
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<FunkoResponseDto> patchFunko(@PathVariable Long id, @Valid @RequestBody FunkoUpdateRequest funko) {
         return ResponseEntity.ok(funkoServices.update(id, funko));
     }
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteFunko(@PathVariable Long id) {
         funkoServices.deleteById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -101,6 +106,7 @@ public class FunkoController {
             @ApiResponse(responseCode = "400", description = "Producto no válido"),
             @ApiResponse(responseCode = "404", description = "Producto no encontrado"),
     })
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping(value = "/imagen/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<FunkoResponseDto> nuevoFunko(
             @PathVariable Long id,
@@ -116,10 +122,6 @@ public class FunkoController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se ha enviado una imagen para el producto o esta está vacía");
         }
     }
-
-
-
-
     // Para capturar los errores de validación
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
