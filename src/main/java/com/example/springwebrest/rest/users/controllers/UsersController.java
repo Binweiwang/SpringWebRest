@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@RequestMapping("/users")
+@RequestMapping("${api.version}/users")
 @PreAuthorize("hasRole('USER')")
 public class UsersController {
     private final UsersService usersService;
