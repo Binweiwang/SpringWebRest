@@ -60,7 +60,7 @@ public class FunkosWebController {
         return "funkos/login";
     }
 
-    @PostMapping("/login")
+    @PostMapping
     public String login(@RequestParam("password") String password, @RequestParam("username") String username,HttpSession session) {
         if ("pass".equals(password)) {
             userSession.setLastLogin(new Date());
@@ -70,7 +70,7 @@ public class FunkosWebController {
             session.setMaxInactiveInterval(1800);
             return "redirect:/funkos";
         } else {
-            return "redirect:/login";
+            return "funkos/login";
         }
     }
 
@@ -145,7 +145,7 @@ public class FunkosWebController {
             return "redirect:/login";
         }
         funkoService.deleteById(id);
-        return "redirect:/";
+        return "redirect:/funkos";
     }
 
     @GetMapping("/create")

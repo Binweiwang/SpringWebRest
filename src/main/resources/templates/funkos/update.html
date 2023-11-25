@@ -13,7 +13,7 @@
     <h1>Actualizar Funko</h1>
     <!-- Agregando th:action="@{/productos/update/{id}(id=${id})}" en el formulario, aseguras que la ruta de acción sea
     la correcta y se envíe la solicitud POST correctamente al controlador. -->
-    <form method="post" th:action="@{/update/{id}(id = ${funko.getId()})}" th:object="${funko}">
+    <form method="post" th:action="@{/funkos/update/{id}(id = ${funko.getId()})}" th:object="${funko}">
         <div class="form-group">
             <label for="marca">Nombre:</label>
             <input class="form-control" id="marca" name="marca" th:field="*{name}" type="text">
@@ -46,7 +46,7 @@
             <small class="text-danger" th:errors="*{categoria}" th:if="${#fields.hasErrors('categoria')}"></small>
         </div>
         <button class="btn btn-primary" type="submit">Crear</button>
-        <a class="btn btn-secondary mx-2" href="/">Volver</a>
+        <a class="btn btn-secondary mx-2" href="/funkos">Volver</a>
     </form>
 </div>
 <!-- Incluir el fragmento del footer -->
