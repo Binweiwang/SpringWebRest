@@ -29,6 +29,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 @Controller
+@RequestMapping("/funkos")
 public class FunkosWebController {
 
     private final FunkoServices funkoService;
@@ -54,7 +55,7 @@ public class FunkosWebController {
     @GetMapping("/login")
     public String login(HttpSession session) {
         if (isLoggedAndSessionIsActive(session)) {
-            return "redirect:/";
+            return "redirect:/funkos";
         }
         return "funkos/login";
     }
@@ -67,7 +68,7 @@ public class FunkosWebController {
             userSession.setUsername(username);
             session.setAttribute("userSession", userSession);
             session.setMaxInactiveInterval(1800);
-            return "redirect:/";
+            return "redirect:/funkos";
         } else {
             return "redirect:/login";
         }
@@ -76,10 +77,10 @@ public class FunkosWebController {
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/login";
+        return "redirect:/funkos";
     }
 
-    @GetMapping("/")
+    @GetMapping(path = {"", "/", "/index", "/list"})
     public String indexListFunkos(
             HttpSession session,
             Model model,
@@ -95,7 +96,7 @@ public class FunkosWebController {
     ) {
 
         if (!isLoggedAndSessionIsActive(session)) {
-            return "redirect:/login";
+            return "redirect:/funkos/login";
         }
 
         UserStore sessionData = (UserStore) session.getAttribute("userSession");
@@ -131,7 +132,7 @@ public class FunkosWebController {
     @GetMapping("/details/{id}")
     public String detailsFunko(@PathVariable("id") Long id, Model model, HttpSession session){
         if (!isLoggedAndSessionIsActive(session)) {
-            return "redirect:/login";
+            return "redirect:/funkos/login";
         }
         var funko = funkoService.findById(id);
         model.addAttribute("funko", funko);
@@ -157,7 +158,7 @@ public class FunkosWebController {
             @RequestParam(defaultValue = "ASC") String order
     ){
         if (!isLoggedAndSessionIsActive(session)) {
-            return "redirect:/login";
+            return "redirect:/funkos/login";
         }
         Sort sort = order.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(orderBy).ascending() : Sort.by(orderBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
@@ -175,7 +176,7 @@ public class FunkosWebController {
             Model model
     ){
         if (!isLoggedAndSessionIsActive(session)) {
-            return "redirect:/login";
+            return "redirect:funkos/login";
         }
         if(result.hasErrors()){
             var categorias = categoriaService.findAll(Optional.empty(), Optional.of(true), Pageable.unpaged()).map(Categoria::getTipo);
@@ -184,7 +185,7 @@ public class FunkosWebController {
         }
 
         funkoService.save(funkoCreateRequest);
-        return "redirect:/";
+        return "redirect:/funkos";
     }
 
     @GetMapping("/update/{id}")
@@ -194,7 +195,7 @@ public class FunkosWebController {
             HttpSession session
     ){
         if (!isLoggedAndSessionIsActive(session)) {
-            return "redirect:/login";
+            return "redirect:funkos/login";
         }
         var funko = funkoService.findById(id);
         var categorias = categoriaService.findAll(Optional.empty(), Optional.of(true), Pageable.unpaged()).map(Categoria::getTipo);
@@ -213,7 +214,7 @@ public class FunkosWebController {
             Model model
     ){
         if (!isLoggedAndSessionIsActive(session)) {
-            return "redirect:/login";
+            return "redirect:funkos/login";
         }
         if(result.hasErrors()){
             var categorias = categoriaService.findAll(Optional.empty(), Optional.of(true), Pageable.unpaged()).map(Categoria::getTipo);
@@ -222,7 +223,7 @@ public class FunkosWebController {
             return "funkos/update";
         }
         funkoService.update(id, funkoUpdateRequest);
-        return "redirect:/";
+        return "redirect:/funkos";
     }
 
     @GetMapping("/update-image/{id}")
@@ -232,7 +233,7 @@ public class FunkosWebController {
             HttpSession session
     ){
         if (!isLoggedAndSessionIsActive(session)) {
-            return "redirect:/login";
+            return "redirect:funkos/login";
         }
         var funko = funkoService.findById(id);
         model.addAttribute("funko", funko);
@@ -246,10 +247,10 @@ public class FunkosWebController {
             HttpSession session
     ){
         if (!isLoggedAndSessionIsActive(session)) {
-            return "redirect:/login";
+            return "redirect:funkos/login";
         }
         funkoService.updateImage(id, imagen, true);
-        return "redirect:/";
+        return "redirect:/funkos";
     }
 
     private boolean isLoggedAndSessionIsActive(HttpSession session) {
