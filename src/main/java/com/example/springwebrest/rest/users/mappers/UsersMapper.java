@@ -4,9 +4,10 @@ import com.example.springwebrest.rest.users.dto.UserInfoResponse;
 import com.example.springwebrest.rest.users.dto.UserRequest;
 import com.example.springwebrest.rest.users.dto.UserResponse;
 import com.example.springwebrest.rest.users.models.User;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
-
+@Component
 public class UsersMapper {
     public User toUser(UserRequest request) {
         return User.builder()
