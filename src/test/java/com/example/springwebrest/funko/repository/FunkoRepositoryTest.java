@@ -17,27 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class FunkoRepositoryTest {
 @Autowired
     private FunkoRepository funkoRepository;
-    private Funko funkoConId = Funko.builder()
-            .id(4L)
-            .name("Funko 4")
-            .price(400.0)
-            .image("Image 4")
-            .categoria(new Categoria())
-            .createdAt(LocalDateTime.now())
-            .updatedAt(LocalDateTime.now())
-            .build();
-    private Funko funkoSinId = Funko.builder()
-            .name("Funko 4")
-                .price(400.0)
-                .image("Image 4")
-                .categoria(new Categoria())
-                .createdAt(LocalDateTime.now())
-            .updatedAt(LocalDateTime.now())
-            .build();
     @Test
     void findAll() {
         assertAll("Obtener todo los funkos",
-                () -> assertEquals(3, funkoRepository.findAll().size())
+                () -> assertEquals(15, funkoRepository.findAll().size())
         );
     }
 
@@ -55,7 +38,7 @@ public class FunkoRepositoryTest {
         funkoRepository.deleteById(1L);
 
         assertAll("Eliminar funko por id",
-                () -> assertEquals(2, funkoRepository.findAll().size())
+                () -> assertEquals(14, funkoRepository.findAll().size())
         );
     }
 

@@ -27,6 +27,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -43,20 +44,21 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @AutoConfigureMockMvc
 @AutoConfigureJsonTesters
 @ExtendWith(MockitoExtension.class)
+@WithMockUser(username = "admin", password = "admin", roles = {"ADMIN", "USER"})
 class FunkoControllerTest {
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
     @MockBean
     private final FunkoServices funkoService;
     @MockBean
     private final FunkoMapper funkoMapper;
-    private final String myEndpoint = "/funkos";
+    private final String myEndpoint = "/v1/funkos";
     private final FunkoResponseDto funkoResponseDto = FunkoResponseDto.builder()
             .id(1L)
             .name("Funko")
             .price(100.0)
             .quantity(10)
             .image("image")
-            .categoria(new Categoria(UUID.fromString("b3d4931d-c1c0-468b-a4b6-9814017a7339"), "TEST", LocalDateTime.now(), LocalDateTime.now(), false))
+            .categoria(String.valueOf(new Categoria(UUID.fromString("b3d4931d-c1c0-468b-a4b6-9814017a7339"), "TEST", LocalDateTime.now(), LocalDateTime.now(), false)))
             .build();
     private final FunkoCreateRequest funkoCreateRequest = FunkoCreateRequest.builder()
             .id(1L)
@@ -73,7 +75,7 @@ class FunkoControllerTest {
             .price(-100.0)
             .quantity(10)
             .image("image")
-            .categoria(new Categoria(UUID.fromString("b3d4931d-c1c0-468b-a4b6-9814017a7339"), "TEST", LocalDateTime.now(), LocalDateTime.now(), false))
+            .categoria(String.valueOf(new Categoria(UUID.fromString("b3d4931d-c1c0-468b-a4b6-9814017a7339"), "TEST", LocalDateTime.now(), LocalDateTime.now(), false)))
             .build();
     @Autowired
     MockMvc mockMvc;

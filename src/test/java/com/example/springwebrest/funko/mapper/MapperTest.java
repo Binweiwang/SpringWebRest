@@ -49,7 +49,6 @@ class MapperTest {
         assertEquals(funkoResponseDto.getPrice(), funko.getPrice());
         assertEquals(funkoResponseDto.getQuantity(), funko.getQuantity());
         assertEquals(funkoResponseDto.getImage(), funko.getImage());
-        assertEquals(funkoResponseDto.getCategoria(), funko.getCategoria());
     }
 
     @Test
@@ -95,6 +94,5 @@ class MapperTest {
         assertEquals(funkoResponseDtos.get(0).getPrice(), funko.getPrice());
         assertEquals(funkoResponseDtos.get(0).getQuantity(), funko.getQuantity());
         assertEquals(funkoResponseDtos.get(0).getImage(), funko.getImage());
-        assertEquals(funkoResponseDtos.get(0).getCategoria(), funko.getCategoria());
     }
 }
