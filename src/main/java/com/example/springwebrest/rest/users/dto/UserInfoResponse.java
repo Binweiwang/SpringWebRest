@@ -24,6 +24,8 @@ public class UserInfoResponse {
     private Set<Role> roles = Set.of(Role.USER);
     @Builder.Default
     private Boolean isDeleted = false;
+
+    private String password;
     @Builder.Default
     private List<String> pedidos = new ArrayList<>();
 }
