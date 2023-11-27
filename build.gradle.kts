@@ -37,6 +37,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     // Spring Data JPA para seguridad
     implementation("org.springframework.boot:spring-boot-starter-security")
+    // Test Spring Security
+    testImplementation("org.springframework.security:spring-security-test")
     // Lombok
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
@@ -59,7 +61,8 @@ dependencies {
     implementation("org.webjars:bootstrap:4.6.2")
     // JWT (Json Web Token)
     implementation("com.auth0:java-jwt:4.4.0")
-
+    // Swagger
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
 }
 
 tasks.test {
