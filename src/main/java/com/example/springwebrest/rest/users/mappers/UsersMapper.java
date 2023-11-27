@@ -18,6 +18,7 @@ public class UsersMapper {
                 .password(request.getPassword())
                 .roles(request.getRoles())
                 .isDeleted(request.getIsDeleted())
+                .password(request.getPassword())
                 .build();
     }
 
@@ -43,6 +44,7 @@ public class UsersMapper {
                 .email(user.getEmail())
                 .roles(user.getRoles())
                 .isDeleted(user.getIsDeleted())
+                .password(user.getPassword())
                 .build();
     }
 
@@ -56,6 +58,7 @@ public class UsersMapper {
                 .roles(user.getRoles())
                 .isDeleted(user.getIsDeleted())
                 .pedidos(pedidos)
+                .password(user.getPassword())
                 .build();
     }
 }

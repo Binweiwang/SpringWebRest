@@ -33,6 +33,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+/**
+ * Implementación de servicio de funkos
+ */
 @Service
 @Slf4j
 @CacheConfig(cacheNames = "funkos")
@@ -58,7 +61,15 @@ public class FunkoServicesImp implements FunkoServices {
         this.funkoMapper = funkoMapper;
     }
 
-
+    /**
+     * Busca todos los funkos con los filtros opcionales
+     * @param name nombre del funko
+     * @param price precio del funko
+     * @param quantity cantidad del funko
+     * @param categoria categoria del funko
+     * @param pageable paginación
+     * @return lista de funkos
+     */
     @Override
     public Page<FunkoResponseDto> findAll(Optional<String> name, Optional<Double> price, Optional<Integer> quantity, Optional<String> categoria, Pageable pageable) {
         Specification<Funko> specCategoria = ((root, criteriaQuery, criteriaBuilder) -> categoria.map(c -> criteriaBuilder.equal(
@@ -78,12 +89,22 @@ public class FunkoServicesImp implements FunkoServices {
 
     }
 
+    /**
+     * Busca un funko por su id
+     * @param id id del funko
+     * @return funko encontrado
+     */
     @Override
     @Cacheable(key = "#id")
     public FunkoResponseDto findById(Long id) {
         return funkoMapper.toFunko(funkoRepository.findById(id).orElseThrow(() -> new FunkoNotFound("El funko con id " + id + " no existe")));
     }
 
+    /**
+     * Guarda un funko
+     * @param funko funko a guardar
+     * @return funko guardado
+     */
     @Override
     @CachePut(key = "#result.id")
     public FunkoResponseDto save(FunkoCreateRequest funko) {
@@ -93,6 +114,12 @@ public class FunkoServicesImp implements FunkoServices {
         return funkoMapper.toFunko(funkoToSave);
     }
 
+    /**
+     * Actualiza un funko
+     * @param id id del funko
+     * @param funko funko a actualizar
+     * @return funko actualizado
+     */
     @Override
     @CachePut(key = "#result.id")
     public FunkoResponseDto update(Long id, FunkoUpdateRequest funko) {
@@ -110,6 +137,10 @@ public class FunkoServicesImp implements FunkoServices {
         return funkoMapper.toFunko(funkoToUpdate);
     }
 
+    /**
+     * Borra un funko por su id
+     * @param id id del funko
+     */
 
     @Override
     @CachePut(key = "#id")
@@ -118,6 +149,10 @@ public class FunkoServicesImp implements FunkoServices {
         funkoRepository.deleteById(id);
         onChange(Notificacion.Tipo.DELETE, funko);
     }
+
+    /**
+     * Borra todos los funkos
+     */
 
     @Override
     public void deleteAll() {
@@ -133,6 +168,13 @@ public class FunkoServicesImp implements FunkoServices {
         return categoria.get();
     }
 
+    /**
+     * Actualiza la imagen de un funko
+     * @param id id del funko
+     * @param image imagen del funko
+     * @param withUrl si queremos la url de la imagen
+     * @return funko actualizado
+     */
     @Override
     public FunkoResponseDto updateImage(Long id, MultipartFile image, Boolean withUrl) {
         log.info("Actualizando imagen del funko con id: " + id);
@@ -161,6 +203,11 @@ public class FunkoServicesImp implements FunkoServices {
         return funkoMapper.toFunko(funkoToUpdate);
     }
 
+    /**
+     * Envía una notificación a los clientes ws
+     * @param tipo tipo de notificación
+     * @param funko funko de la notificación
+     */
     public void onChange(Notificacion.Tipo tipo, Funko funko) {
         log.debug("Servicio de productos onChange con tipo: " + tipo + " y datos: " + funko);
 
@@ -194,6 +241,11 @@ public class FunkoServicesImp implements FunkoServices {
             log.error("Error al convertir la notificación a JSON", e);
         }
     }
+
+    /**
+     * Setter del servicio de websockets
+     * @param webSocketHandlerMock servicio de websockets
+     */
 
     public void setWebSocketService(WebSocketHandler webSocketHandlerMock) {
         this.webSocketService = webSocketHandlerMock;

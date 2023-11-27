@@ -17,6 +17,7 @@ public class UserResponse {
     private String nombre;
     private String apellidos;
     private String username;
+    private String password;
     private String email;
     @Builder.Default
     private Set<Role> roles = Set.of(Role.USER);

@@ -29,7 +29,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
+@RestController
 @RequestMapping("${api.version}/users")
 @PreAuthorize("hasRole('USER')")
 public class UsersController {
@@ -63,6 +63,12 @@ public class UsersController {
                 .header("link", paginationLinksUtils.createLinkHeader(pageResult, uriBuilder))
                 .body(PageResponse.of(pageResult, sortBy, order));
 
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserInfoResponse> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(usersService.findById(id));
     }
 
     @PostMapping
@@ -121,9 +127,13 @@ public class UsersController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Pedido> getPedido(
             @AuthenticationPrincipal User user,
-            @PathVariable("id") ObjectId idPeidio
+            @PathVariable("id") ObjectId idPedido
     ) {
-        return ResponseEntity.ok(pedidosService.findById(idPeidio));
+        Pedido pedido = pedidosService.findById(idPedido);
+        if (!pedido.getIdUsuario().equals(user.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(pedidosService.findById(idPedido));
     }
 
     @PostMapping("/me/pedidos")

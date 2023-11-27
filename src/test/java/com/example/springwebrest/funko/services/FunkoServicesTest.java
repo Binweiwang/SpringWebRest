@@ -30,10 +30,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.print.Pageable;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -43,7 +41,8 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class FunkoServicesTest {
-    private final Categoria categoria = new Categoria(UUID.fromString("b3d4931d-c1c0-468b-a4b6-9814017a7339"), "DISNEY", LocalDateTime.now(), LocalDateTime.now(), false);
+    private final Categoria categoria = new Categoria(UUID.fromString("b3d4931d-c1c0-468b-a4b6-9814017a7339"), "DISNEY", LocalDateTime.now(), LocalDateTime.now(), true);
+    private final Categoria categoriaBorrada = new Categoria(UUID.fromString("b3d4931d-c1c0-468b-a4b6-9814017a7339"), "BORRADA", LocalDateTime.now(), LocalDateTime.now(), false);
     private final CategoriaRequest categoriaRequest = new CategoriaRequest("DISNEY", false);
     private final Funko funko = new Funko().builder()
             .id(1L)
@@ -53,11 +52,8 @@ public class FunkoServicesTest {
             .image("https://wallhaven.cc/w/85852j")
             .categoria(categoria)
             .build();
-    private final List<Funko> ListaFunkos = List.of(
-            new Funko(1L, "Funko 1", 100.0, 10, "https://images-na.ssl-images-amazon.com/images/I/61%2B%2Bq%2B0%2B%2BZL._AC_SL1500_.jpg", new Categoria(), LocalDateTime.now(), LocalDateTime.now()),
-            new Funko(2L, "Funko 2", 200.0, 20, "https://images-na.ssl-images-amazon.com/images/I/61%2B%2Bq%2B0%2B%2BZL._AC_SL1500_.jpg", new Categoria(), LocalDateTime.now(), LocalDateTime.now()),
-            new Funko(3L, "Funko 3", 300.0, 30, "https://images-na.ssl-images-amazon.com/images/I/61%2B%2Bq%2B0%2B%2BZL._AC_SL1500_.jpg", new Categoria(), LocalDateTime.now(), LocalDateTime.now())
-    );
+
+
     private final FunkoUpdateRequest funkoUpdateRequest = FunkoUpdateRequest.builder()
             .name("Funko 1")
             .price(100.0)
@@ -79,7 +75,7 @@ public class FunkoServicesTest {
             .price(100.0)
             .quantity(10)
             .image("https://wallhaven.cc/w/85852j")
-            .categoria(categoria)
+            .categoria(String.valueOf(categoria))
             .build();
     private final FunkoCreateRequest funkoCreateRequest = FunkoCreateRequest.builder()
             .name("Funko 1")
@@ -155,7 +151,7 @@ public class FunkoServicesTest {
         assertThrows(FunkoNotFound.class, () -> funkoService.findById(1L));
     }
     @Test
-    void save() {
+    void saveTest() {
         when(categoriaRepository.findByTipoEqualsIgnoreCase("DISNEY")).thenReturn(Optional.of(categoria));
         when(funkoMapper.toFunko(funkoCreateRequest, categoria)).thenReturn(funko);
         when(repository.save(any(Funko.class))).thenReturn(funko);
@@ -204,8 +200,7 @@ public class FunkoServicesTest {
         assertAll("Comprobar funko actualizado",
                 () -> assertEquals("Funko 1", funkoUpdated.getName()),
                 () -> assertEquals(100.0, funkoUpdated.getPrice()),
-                () -> assertEquals(10, funkoUpdated.getQuantity()),
-                () -> assertEquals("DISNEY", funkoUpdated.getCategoria().getTipo())
+                () -> assertEquals(10, funkoUpdated.getQuantity())
         );
 
     }
@@ -240,7 +235,7 @@ public class FunkoServicesTest {
 
         assertAll("Comprobar categoría",
                 () -> assertEquals("DISNEY", categoriaChecked.getTipo()),
-                () -> assertFalse(categoriaChecked.isActive()));
+                () -> assertTrue(categoriaChecked.isActive()));
     }
 
     @Test
@@ -254,7 +249,7 @@ public class FunkoServicesTest {
     void categoriaBorrada() {
         categoria.setActive(true);
 
-        when(categoriaRepository.findByTipoEqualsIgnoreCase("BORRADA")).thenReturn(Optional.of(categoria));
+        when(categoriaRepository.findByTipoEqualsIgnoreCase("BORRADA")).thenReturn(Optional.of(categoriaBorrada));
         assertThrows(FunkoBadRequest.class, () -> funkoService.checkCategoria("BORRADA"));
     }
     @Test

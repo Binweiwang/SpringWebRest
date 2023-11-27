@@ -21,6 +21,8 @@ import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.ErrorResponse;
 
@@ -35,6 +37,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @SpringBootTest
 @AutoConfigureMockMvc
 @ExtendWith(MockitoExtension.class)
+@WithMockUser(username = "admin", password = "admin", roles = {"ADMIN", "USER"})
 public class CategoriaConstollersTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
@@ -51,7 +54,7 @@ public class CategoriaConstollersTest {
     CategoriaRequest categoriaCreateDto = CategoriaRequest.builder()
             .tipo("DISNEY")
             .build();
-    String endPoint = "/categorias";
+    String endPoint = "/v1/categorias";
     @MockBean
     private CategoriaServicesImp service;
 
@@ -78,8 +81,8 @@ public class CategoriaConstollersTest {
                                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse();
 
-PageResponse<Categoria> res = mapper.readValue(response.getContentAsString(),
-                mapper.getTypeFactory().constructParametricType(PageResponse.class, Categoria.class));
+PageResponse<Categoria> res = mapper.readValue(response.getContentAsString(), new TypeReference<>() {
+        });
 
         // Assert
         assertAll("findallCategorias",
