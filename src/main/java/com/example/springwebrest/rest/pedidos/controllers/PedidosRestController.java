@@ -2,6 +2,7 @@ package com.example.springwebrest.rest.pedidos.controllers;
 
 import com.example.springwebrest.rest.pedidos.models.Pedido;
 import com.example.springwebrest.rest.pedidos.services.PedidosService;
+import com.example.springwebrest.rest.users.exceptions.UserNotFound;
 import com.example.springwebrest.utils.pagination.PageResponse;
 import com.example.springwebrest.utils.pagination.PaginationLinksUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -94,6 +95,13 @@ public class PedidosRestController {
         log.info("Borrando pedido con id: " + idPedido);
         pedidosService.delete(idPedido);
         return ResponseEntity.noContent().build();
+    }
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(UserNotFound.class)
+    public Map<String, String> handleUserNotFoundException(UserNotFound ex) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", ex.getMessage());
+        return errors;
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
