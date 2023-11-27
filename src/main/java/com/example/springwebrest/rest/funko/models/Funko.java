@@ -2,6 +2,7 @@ package com.example.springwebrest.rest.funko.models;
 
 
 import com.example.springwebrest.rest.categoria.models.Categoria;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -14,32 +15,35 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "funkos")
+@Table(name = "FUNKOS")
+@Schema(name = "Funkos")
 public class Funko {
-    public static final String IMAGE_DEFAULT ="https://www.laopticadeantonio.es/wp-content/uploads/2013/12/150x150.gif";
+    public static final String IMAGE_DEFAULT ="https://via.placeholder.com/150";
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "Identificador del funko", example = "1")
     private Long id;
-    @Column
     @NotEmpty(message = "El nombre no puede estar vacio")
+    @Schema(description = "Nombre del funko", example = "Funko 1")
     private String name;
-    @Column
     @Builder.Default
+    @Schema(description = "Precio del funko", example = "10.0")
     private Double price = 0.0;
     @Builder.Default
-    @Column
+    @Schema(description = "Cantidad del funko", example = "10")
     private Integer quantity = 0;
-    @Column
     @Builder.Default
+    @Schema(description = "Imagen del funko", example = "https://via.placeholder.com/150")
     private String image = IMAGE_DEFAULT;
     @NotNull(message = "La categoria no puede estar vacia")
     @ManyToOne
     @JoinColumn(name = "categoria_id")
+    @Schema(description = "Categoria del funko", example = "DISNEY")
     private Categoria categoria;
-    @Column
     @Builder.Default
+    @Schema(description = "Fecha de creación del funko", example = "2021-10-01T00:00:00.000Z")
     private LocalDateTime createdAt = LocalDateTime.now();
-    @Column
     @Builder.Default
+    @Schema(description = "Fecha de actualización del funko", example = "2021-10-01T00:00:00.000Z")
     private LocalDateTime updatedAt = LocalDateTime.now();
 }
