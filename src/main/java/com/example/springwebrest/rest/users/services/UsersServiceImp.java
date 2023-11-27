@@ -13,6 +13,7 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -22,11 +23,13 @@ public class UsersServiceImp implements UsersService{
     private final UsersRepository usersRepository;
     private final PedidosRepository pedidosRepository;
     private final UsersMapper usersMapper;
+    private final PasswordEncoder passwordEncoder;
 
-    public UsersServiceImp(UsersRepository usersRepository, PedidosRepository pedidosRepository, UsersMapper usersMapper) {
+    public UsersServiceImp(UsersRepository usersRepository, PedidosRepository pedidosRepository, UsersMapper usersMapper, PasswordEncoder passwordEncoder) {
         this.usersRepository = usersRepository;
         this.pedidosRepository = pedidosRepository;
         this.usersMapper = usersMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -61,6 +64,8 @@ public class UsersServiceImp implements UsersService{
                 .ifPresent(u -> {
                     throw new UserNameOrEmailExists("Username o email ya existe");
                 });
+        String passwordEncode = passwordEncoder.encode(userRequest.getPassword());
+        userRequest.setPassword(passwordEncode);
         return usersMapper.toUserResponse(usersRepository.save(usersMapper.toUser(userRequest)));
     }
 
@@ -73,6 +78,8 @@ public class UsersServiceImp implements UsersService{
                         throw new UserNameOrEmailExists("Username ya existe");
                     }
                 });
+        String passwordEncode = passwordEncoder.encode(userRequest.getPassword());
+        userRequest.setPassword(passwordEncode);
         return usersMapper.toUserResponse(usersRepository.save(usersMapper.toUser(userRequest, id)));
     }
 
