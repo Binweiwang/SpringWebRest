@@ -5,6 +5,8 @@ import com.example.springwebrest.rest.pedidos.exceptions.*;
 import com.example.springwebrest.rest.pedidos.models.LineaPedido;
 import com.example.springwebrest.rest.pedidos.models.Pedido;
 import com.example.springwebrest.rest.pedidos.repositories.PedidosRepository;
+import com.example.springwebrest.rest.users.exceptions.UserNotFound;
+import com.example.springwebrest.rest.users.services.UsersService;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.cache.annotation.CacheConfig;
@@ -24,10 +26,12 @@ import java.time.LocalDateTime;
 public class PedidosServiceImpl implements PedidosService {
     private final PedidosRepository pedidosRepository;
     private final FunkoRepository funkoRepository;
+    private final UsersService usersService;
 
-    public PedidosServiceImpl(PedidosRepository pedidosRepository, FunkoRepository funkoRepository) {
+    public PedidosServiceImpl(PedidosRepository pedidosRepository, FunkoRepository funkoRepository, UsersService usersService) {
         this.pedidosRepository = pedidosRepository;
         this.funkoRepository = funkoRepository;
+        this.usersService = usersService;
     }
 
     @Override
@@ -144,10 +148,13 @@ public class PedidosServiceImpl implements PedidosService {
 
     void checkPedido(Pedido pedido) {
         log.info("Comprobando pedido: {}", pedido);
+        Long idUsuario = pedido.getIdUsuario();
+        usersService.findById(idUsuario);
 
         if (pedido.getLineasPedido() == null || pedido.getLineasPedido().isEmpty()) {
             throw new PedidoNotItems(pedido.getId().toHexString());
         }
+
         pedido.getLineasPedido().forEach(lineaPedido -> {
             var producto = funkoRepository.findById(lineaPedido.getIdProducto())
                     .orElseThrow(() -> new ProductoNotFound(lineaPedido.getIdProducto()));
