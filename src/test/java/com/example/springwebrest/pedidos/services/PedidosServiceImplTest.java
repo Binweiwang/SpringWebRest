@@ -4,10 +4,13 @@ import com.example.springwebrest.rest.funko.models.Funko;
 import com.example.springwebrest.rest.funko.repository.FunkoRepository;
 import com.example.springwebrest.rest.pedidos.exceptions.PedidoNotFound;
 import com.example.springwebrest.rest.pedidos.exceptions.PedidoNotItems;
+import com.example.springwebrest.rest.pedidos.exceptions.ProductoNotFound;
 import com.example.springwebrest.rest.pedidos.models.LineaPedido;
 import com.example.springwebrest.rest.pedidos.models.Pedido;
 import com.example.springwebrest.rest.pedidos.repositories.PedidosRepository;
 import com.example.springwebrest.rest.pedidos.services.PedidosServiceImpl;
+import com.example.springwebrest.rest.users.dto.UserInfoResponse;
+import com.example.springwebrest.rest.users.services.UsersService;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,10 +34,24 @@ class PedidosServiceImplTest {
     private PedidosRepository pedidosRepository;
     @Mock
     private FunkoRepository funkoRepository;
+    @Mock
+    private UsersService usersService;
 
     @InjectMocks
     private PedidosServiceImpl pedidosService;
 
+    private Pedido pedido = Pedido.builder()
+            .id(new ObjectId())
+            .idUsuario(1L)
+            .total(20.0)
+            .totalItems(2)
+            .idUsuario(1L)
+            .lineasPedido(List.of(LineaPedido.builder()
+                    .idProducto(1L)
+                    .cantidad(2)
+                    .precioProducto(10.0)
+                    .build()))
+            .build();
     @Test
     void findAll() {
         // Arrange
@@ -111,16 +128,23 @@ class PedidosServiceImplTest {
                 .price(10.0)
                 .build();
 
-        Pedido pedido = new Pedido();
         LineaPedido lineaPedido = LineaPedido.builder()
                 .idProducto(1L)
                 .cantidad(2)
                 .precioProducto(10.0)
                 .build();
         pedido.setLineasPedido(List.of(lineaPedido));
-        Pedido pedidoToSave = new Pedido();
+        Pedido pedidoToSave = Pedido.builder()
+                .id(new ObjectId())
+                .idUsuario(1L)
+                .total(20.0)
+                .totalItems(2)
+                .idUsuario(1L)
+                .lineasPedido(List.of(lineaPedido))
+                .build();
         pedidoToSave.setLineasPedido(List.of(lineaPedido));
 
+        when(usersService.findById(anyLong())).thenReturn(UserInfoResponse.builder().id(1L).build());
         when(pedidosRepository.save(any(Pedido.class))).thenReturn(pedidoToSave); // Utiliza any(Pedido.class) para cualquier instancia de Pedido
         when(funkoRepository.findById(anyLong())).thenReturn(Optional.of(funko));
 
@@ -138,11 +162,11 @@ class PedidosServiceImplTest {
 
     @Test
     void saveNotItems() {
-        // Arrange
-        Pedido pedido = new Pedido();
+        // Arrang
+        when(usersService.findById(anyLong())).thenReturn(UserInfoResponse.builder().id(1L).build());
 
         // Act & Assert
-        assertThrows(PedidoNotItems.class, () -> pedidosService.save(pedido));
+        assertThrows(ProductoNotFound.class, () -> pedidosService.save(pedido));
     }
 
     @Test
@@ -184,11 +208,11 @@ class PedidosServiceImplTest {
                 .build();
 
         ObjectId idPedido = new ObjectId();
-        Pedido pedido = new Pedido();
         pedido.setLineasPedido(List.of(lineaPedido));
         Pedido pedidoToUpdate = new Pedido();
         pedidoToUpdate.setLineasPedido(List.of(lineaPedido)); // Inicializar la lista de líneas de pedido
 
+        when(usersService.findById(anyLong())).thenReturn(UserInfoResponse.builder().id(1L).build());
         when(pedidosRepository.findById(idPedido)).thenReturn(Optional.of(pedidoToUpdate));
         when(pedidosRepository.save(any(Pedido.class))).thenReturn(pedidoToUpdate);
         when(funkoRepository.findById(anyLong())).thenReturn(Optional.of(funko));
