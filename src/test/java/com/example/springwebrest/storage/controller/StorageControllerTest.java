@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @ExtendWith(MockitoExtension.class)
-@SpringBootTest(properties = "spring.profiles.active=test")
+@SpringBootTest
 public class StorageControllerTest {
 
     @Autowired
